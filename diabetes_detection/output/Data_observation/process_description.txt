@@ -1,0 +1,11 @@
+~~~~~~~~~~~~~~~~~~~~~~~ Project file data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+____________________________________________________________________________________
+single level data handling : 0
+
+skew removed
+
+
+drop_columns = []
+
+object to numeric converter : deactiveted
