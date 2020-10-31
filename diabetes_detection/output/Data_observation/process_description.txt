@@ -1,20 +1,11 @@
 ~~~~~~~~~~~~~~~~~~~~~~~ Project file data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-
- hit_map 1 : 1------
-
----------------- Numerical_outliars : Top ---------------------
-
-____________________________________________________________________________________
-single level data handling : 0
-\multi level data handling : 0
+All prime data has been saved at : '+path+'all_data_prime.csv
+\multi level data handling : 1
 
 skew removed
 
 
-drop_columns = []
-
+All modified data has been saved at : ./output/Data_observation/all_data_secondary.csv
 object to numeric converter : deactiveted
-
-hit_map 2 : 1

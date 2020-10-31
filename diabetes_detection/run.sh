@@ -1,6 +1,5 @@
 #!/bin/bash
-
-#source /home/mz/Desktop/project/my_py3/bin/activate
+clear
 
 python3 -m programs.project_v2
 

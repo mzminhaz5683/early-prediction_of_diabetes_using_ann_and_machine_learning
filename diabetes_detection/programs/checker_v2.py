@@ -21,10 +21,10 @@ def missing_data(file, save):
     percent = ((file.isnull().sum()/file.isnull().count()) * 100).sort_values(ascending=False)
     missing_data = pd.concat([total, percent, dtypes], axis=1, keys=['Total', 'Percent', 'Data Type'])
     if save == 1:
-        print(len(nullcols), " missing data, data saves in 'missing_file.csv'")
+        print(len(nullcols), " missing data, data saves in 'missing_file before_operations.csv'")
         missing_data.to_csv(path+'missing_file before_operations.csv')
     elif save == 2:
-        print(len(nullcols), " missing data, data saves in 'missing_file.csv'")
+        print(len(nullcols), " missing data, data saves in 'missing_file before_operations.csv'")
         missing_data.to_csv(path+'missing_file after_operations.csv')
     else:
         print(len(nullcols), " missing data")

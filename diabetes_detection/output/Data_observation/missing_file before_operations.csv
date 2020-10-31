@@ -1,0 +1,9 @@
+,Total,Percent,Data Type
+Age,0,0.0,int64
+DiabetesPedigreeFunction,0,0.0,float64
+BMI,0,0.0,float64
+Insulin,0,0.0,int64
+SkinThickness,0,0.0,int64
+BloodPressure,0,0.0,int64
+Glucose,0,0.0,int64
+Pregnancies,0,0.0,int64
