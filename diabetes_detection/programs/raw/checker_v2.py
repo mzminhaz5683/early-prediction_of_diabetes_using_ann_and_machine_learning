@@ -14,18 +14,15 @@ path = ''
 def missing_data(file, save):
     nulls = np.sum(file.isnull())
     nullcols = nulls.loc[(nulls != 0)]
-    dtypes = file.dtypes # all columns datatype
-    dtypes2 = dtypes.loc[(nulls != 0)] # only non null columns datatype
+    dtypes = file.dtypes
+    dtypes2 = dtypes.loc[(nulls != 0)]
 
     total = file.isnull().sum().sort_values(ascending=False)
     percent = ((file.isnull().sum()/file.isnull().count()) * 100).sort_values(ascending=False)
-    missing_data = pd.concat([total, percent, dtypes], axis=1, keys=['Total', 'Percent', 'Data Type'])
-    if save == 1:
+    missing_data = pd.concat([total, percent, dtypes2], axis=1, keys=['Total', 'Percent', 'Data Type'])
+    if save:
         print(len(nullcols), " missing data, data saves in 'missing_file.csv'")
-        missing_data.to_csv(path+'missing_file before_operations.csv')
-    elif save == 2:
-        print(len(nullcols), " missing data, data saves in 'missing_file.csv'")
-        missing_data.to_csv(path+'missing_file after_operations.csv')
+        missing_data.to_csv(path+'missing_file.csv')
     else:
         print(len(nullcols), " missing data")
 

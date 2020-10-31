@@ -1,7 +1,9 @@
 ~~~~~~~~~~~~~~~~~~~~~~~ Project file data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------- Numerical_outliars : Top ---------------------
 
 ____________________________________________________________________________________
 single level data handling : 0
+\multi level data handling : 0
 
 skew removed
 

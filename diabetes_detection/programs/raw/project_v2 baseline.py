@@ -99,7 +99,25 @@ train = train.drop(drop_index)
 
 p_description += "drop_index = train[(train[''] > 3000)].index\n"
 '''
+#####################################################################################################
+#...............................2b categorical analyzing.................................
+if controler.check_outliars_objects:
+    objects = []
+    for i in train.columns:
+        if train[i].dtype == object:
+            objects.append(i)
 
+    if controler.save_column_name:
+        # get only column names and transposes(T) row into columns
+        object_data = train[objects]
+        cName_n_data = object_data.head(0).T
+        cName_n_data.to_csv(path + 'object_save_column_names.csv')
+        print('Object columns names saved at :' + path + 'Object_save_column_names.csv')
+
+    if 1:
+        for i in objects:
+            checker_v2.categorical_relationship(train, i)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ########################## concatenation of train & test ################################
 y_train = train.Outcome.reset_index(drop=True) # assign
 df_train = train.drop(['Outcome'], axis = 1) # drop
@@ -122,7 +140,7 @@ print('\nall_data shape (Rows, Columns) & Columns-(ID, Outcome): ', all_data.sha
 
 ####################################### data operation #######################################
 if controler.missing_data:
-    checker_v2.missing_data(all_data, controler.save_column_name) # checking missing data 1/0 for save as file or not
+    checker_v2.missing_data(all_data, 1) # checking missing data 1/0 for save as file or not
 
 
 #......................... single level (Data Handling) .................................
@@ -141,11 +159,20 @@ if controler.multi_level_Data_Handling :
     all_data[''] = all_data[''].fillna('')
 
     #------------------------------------------------------------------------------------
+    # categorical( = need to be numerical)
+    c2n = []
     #'NA' means most frequest value
     common_vars = [ ]
+    common_vars += c2n
     for var in common_vars:
         all_data[var] = all_data[var].fillna(all_data[var].mode()[0])
-    p_description += " = fillna(all_data[var].mode()[0])\n"
+    p_description += "common_vars += c2n &\n'', '' = fillna(all_data[var].mode()[0])\n"
+    #------------------------------------------------------------------------------------
+    # categorical( = need to be numerical)
+    common_vars = []
+    # categorical 'NA' means 'None'
+    for col in common_vars:
+        all_data[col] = all_data[col].fillna('None')
     #------------------------------------------------------------------------------------
     # numerical 'NA' means 0
     common_vars = ['', '', '', '', '']
@@ -159,6 +186,14 @@ if controler.multi_level_Data_Handling :
     # condition of data description
     all_data[''] = all_data[''].fillna(all_data[''])
     #------------------------------------------------------------------------------------
+    # Collecting all object type feature and handling multi level null values
+    objects = []
+    for i in all_data.columns:
+        if all_data[i].dtype == object:
+            objects.append(i)
+
+    all_data.update(all_data[objects].fillna('None'))
+    #------------------------------------------------------------------------------------
     # Collectting all numeric type feature and handling multi level null values
     numeric_dtypes = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     numerics = []
@@ -171,10 +206,19 @@ else:
     print('multi level data handling : 0\n')
     p_description +='\multi level data handling : 0\n'
 
+####################### conversion of data-type ####################################
+# (categorical) converting numerical variables that are actually categorical
+if controler.objective_conversion == 1:
+    cols = ['', '', '', '', '']
+    for var in cols:
+        all_data[var] = all_data[var].astype(str)
+    print("cols = {0} =  str\n".format(cols))
+    p_description +="\ncols = {0} =  str\n".format(cols)
+#---------------------------------------------------------------------------------
 
 print('skew removed\n')
 p_description +='\nskew removed\n'
-if controler.save_all_data:
+if 0:
     all_data.to_csv(path+'all_data_secondary.csv')
     print('\nAll modified data has been saved at : '+path+'all_data_secondary.csv')
     p_description +='\n\nAll modified data has been saved at : '+path+'all_data_secondary.csv'
@@ -189,7 +233,7 @@ p_description +="\n\ndrop_columns = {0}\n".format(drop_columns)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if controler.missing_data:
-    checker_v2.missing_data(all_data, controler.save_column_name + 1) # checking missing data 1/0 for save as file or not
+    checker_v2.missing_data(all_data, 0) # checking missing data 1/0 for save as file or not
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ####################### skewed & log1p on numerical features ###########################################
@@ -229,7 +273,7 @@ df_merged_num_scaled = pd.DataFrame(data = df_merged_num_scaled, columns = df_me
 df_merged_cat = all_data.select_dtypes(include = ['object']).astype('category')
 
 
-if controler.class_conversion:
+if controler.o2n_converter:
     print('object to numeric converter : 1\n')
     p_description +="\nobject to numeric converter : 1\n"
     # !!!!!!!!!!!!!!!!!!!!!!!!!  fillna(0)  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /home/minhaz/Desktop/project_thesis/my_py/bin/activate
+source /home/mz/Desktop/project/my_py3/bin/activate
 
 python -m programs.project_v2
 
