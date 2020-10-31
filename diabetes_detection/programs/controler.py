@@ -1,4 +1,4 @@
-hit_map = 0
+hit_map = 1
 log_normalization_on_target = 0 # binary outcome class
 
 save_column_name = 0

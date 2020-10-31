@@ -59,13 +59,6 @@ if controler.hit_map:
     p_description +="\n\n\n hit_map 1 : 1------\n\n"
     plt.show()
 
-
-######################################## 1. Data Handling #########################################
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if controler.log_normalization_on_target: # no need for 0,1 range
-    print("Outcome_log1p : on\n")
-    p_description +="\nOutcome_log1p : on\n"
-    train['Outcome'] = np.log1p(train['Outcome'])
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ######################################## 2. Out-liars Handling #########################################
 #..............................2a numerical analyzing...................................
@@ -289,9 +282,9 @@ if controler.hit_map:
     sns.heatmap(corrmat, vmax=1, square=True)
     plt.show()
 
-    # Partial numerical correlation matrix (salePrice)
+    # Partial numerical correlation matrix (Outcome)
     corr_num = 15  # number of variables for heatmap
-    cols_corr = corrmat.nlargest(corr_num, 'SalePrice')['SalePrice'].index
+    cols_corr = corrmat.nlargest(corr_num, 'Outcome')['Outcome'].index
     corr_mat_sales = np.corrcoef(df_train[cols_corr].values.T)
     f, ax = plt.subplots(figsize=(20, 15))
     hm = sns.heatmap(corr_mat_sales, cbar=True, annot=True, square=True, fmt='.2f',

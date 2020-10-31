@@ -51,7 +51,7 @@ def general_distribution(file, cell):
 #.....Relationship with numerical variables of Outcome (Bivariate analysis)
 def numerical_relationship(file, var):
     data = pd.concat([file['Outcome'], file[var]], axis=1)
-    data.plot.scatter(x=var, y='Outcome', ylim=(0, 800000))
+    data.plot.scatter(x=var, y='Outcome', ylim=(0, 1))
     plt.show()
 
 #.....Relationship with categorical features of Outcome (Bivariate analysis)

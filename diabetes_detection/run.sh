@@ -1,8 +1,8 @@
 #!/bin/bash
 
-source /home/mz/Desktop/project/my_py3/bin/activate
+#source /home/mz/Desktop/project/my_py3/bin/activate
 
-python -m programs.project_v2
+python3 -m programs.project_v2
 
 
 #kill -9 PID

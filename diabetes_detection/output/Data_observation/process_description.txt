@@ -1,4 +1,9 @@
 ~~~~~~~~~~~~~~~~~~~~~~~ Project file data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+ hit_map 1 : 1------
+
 ---------------- Numerical_outliars : Top ---------------------
 
 ____________________________________________________________________________________
@@ -11,3 +16,5 @@ skew removed
 drop_columns = []
 
 object to numeric converter : deactiveted
+
+hit_map 2 : 1
