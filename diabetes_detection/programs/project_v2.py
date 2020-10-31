@@ -33,7 +33,7 @@ test.drop(['Id'], axis=1, inplace=True)
 raw_dataset.drop(['Id'], axis=1, inplace=True)
 
 ######################################## Heat Map raw_dataset : 1 ################################################
-if controler.hit_map:
+if controler.hit_map == 1:
     # Complete numerical correlation matrix
     corrmat = raw_dataset.corr()
     f, ax = plt.subplots(figsize=(20, 25))
@@ -51,22 +51,18 @@ if controler.hit_map:
     
     print("\n\n hit_map_raw_dataset 1 : 1------\n\n")
     plt.show()
+######################################## 2. Out-liars Handling ######################################
 
-if controler.histogram_show == 1:
-    checker_v2.histogram_show(raw_dataset)
-    checker_v2.histogram_show(train)
-    checker_v2.histogram_show(test)
-######################################## 2. Out-liars Handling #########################################
-#..............................2a numerical analyzing...................................
-if controler.check_outliars_numeric == 1:
+################################# numerical relationship : 1 #######################################
+if controler.check_outliars_numeric_relation == 1:
     numeric_dtypes = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     numerics = []
     for i in train.columns:
         if train[i].dtype in numeric_dtypes:
             numerics.append(i)
 
+     # get only column names and transposes(T) row into columns
     if controler.save_column_name:
-        # get only column names and transposes(T) row into columns
         numeric_data = train[numerics]
         cName_n_data = numeric_data.head(0).T
         cName_n_data.to_csv(path + 'numeric_save_column_names.csv')
@@ -76,18 +72,24 @@ if controler.check_outliars_numeric == 1:
         for i in numerics:
             checker_v2.numerical_relationship(train, i)
 
-elif controler.check_outliars_numeric > 1:
+elif 3 > controler.check_outliars_numeric_relation > 1:
     numerics_outliars = ['Glucose', 'BMI', 'Age', 'DiabetesPedigreeFunction']
     for i in numerics_outliars:
         checker_v2.numerical_relationship(train, i)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+############################################# histogram : 1 ####################################
+if controler.histogram_show == 1:
+    checker_v2.histogram_show(raw_dataset)
+    checker_v2.histogram_show(train)
+    checker_v2.histogram_show(test)
 ########################## concatenation of train & test ################################
 y_train = train.Outcome.reset_index(drop=True) # assign
 df_train = train.drop(['Outcome'], axis = 1) # drop
 df_test = test # assign
 
 all_data = pd.concat([df_train, df_test]).reset_index(drop=True) # concatenation
-#dtypes = all_data.dtypes
+#--------------------------------------------------------------------------------------------------
+################################### Save data ###################################################
 if controler.save_all_data:
     all_data.to_csv(path+'all_data_prime.csv')
     print('\nAll prime data has been saved at : '+path+'all_data_prime.csv\n')
@@ -95,7 +97,10 @@ if controler.save_all_data:
 
 print('____________________________________________________________________________________')
 print('\nall_data shape (Rows, Columns) & Columns-(ID, Outcome): ', all_data.shape)
+
+
 ####################################### data operation #######################################
+#----------------------------------- Missing data checking ---------------------------------------
 if controler.missing_data:
     checker_v2.missing_data(all_data, controler.save_column_name) # checking missing data 1/0 for save as file or not
 
@@ -148,11 +153,60 @@ else:
     print('multi level data handling : 0\n')
     p_description +='\multi level data handling : 0\n'
 
-############################## adding new feature ######################################
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ missing data ccheck again~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if controler.missing_data:
     checker_v2.missing_data(all_data, controler.save_column_name + 1) # checking missing data 1/0 for save as file or not
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+############################## adding new feature ######################################
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ class conversion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if controler.class_conversion:
+    #class creation
+
+    def class_generator(clmn, clmn_target, rng, data_lst):
+        j = -1
+        for i in all_data[clmn]:
+            j += 1
+            if i <= rng[0]:
+                all_data[clmn_target][j] = data_lst[0]
+            elif rng[0] < i <= rng[1]:
+                all_data[clmn_target][j] = data_lst[1]
+            elif rng[1] < i <= rng[2]:
+                all_data[clmn_target][j] = data_lst[2]
+            elif rng[2] < i <= rng[3]:
+                all_data[clmn_target][j] = data_lst[3]
+            else:
+                all_data[clmn_target][j] = data_lst[4]
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    print('for class_generator')
+    all_data['AgeClass'] = 0
+    class_generator('Age', 'AgeClass', [25, 38, 51, 59], [1,2,3,4,5])
+
+    all_data['GlucoClass'] = 0
+    class_generator('Glucose', 'GlucoClass', [60, 80, 140, 180], [4,2,1,3,5])
+
+    all_data['BPClass'] = 0
+    class_generator('BloodPressure', 'BPClass', [60, 75, 90, 100], [4,2,1,3,5])
+
+    all_data['BMIClass'] = 0
+    class_generator('BMI', 'BMIClass', [18, 24, 30, 38], [2,1,3,4,5])
+else:
+    print('object to numeric converter : deactiveted\n')
+    p_description +='\nobject to numeric converter : deactiveted\n'
+
+############################### saving data ###################################################
+
+if controler.save_column_name:
+    # get only column names and transposes(T) row into columns
+    cName_all_data = all_data.head(0).T
+    cName_all_data.to_csv(path+'save_column_names.csv')
+    print('Columns names saved at :'+path+'save_column_names.csv')
+    p_description +='\nColumns names saved at :'+path+'save_column_names.csv'
+
+if controler.save_all_data:
+    all_data.to_csv(path+'all_data_secondary.csv')
+    print('\nAll modified data has been saved at : '+path+'all_data_secondary.csv')
+    p_description +='\n\nAll modified data has been saved at : '+path+'all_data_secondary.csv'
 
 ####################### skewed & log1p on numerical features ###########################################
 if controler.skw_log:
@@ -183,59 +237,13 @@ if controler.skw_log:
     # Retrive column names
     df_merged_num_scaled = pd.DataFrame(data = df_merged_num_scaled, columns = df_merged_num.columns, index = df_merged_num.index)
 
-####################### skewed & log1p on numerical features ###########################################
-
-if controler.class_conversion:
-    #class creation
-
-    def class_generator(clmn, clmn_target, rng, data_lst):
-        j = -1
-        for i in all_data[clmn]:
-            j += 1
-            if i <= rng[0]:
-                all_data[clmn_target][j] = data_lst[0]
-            elif rng[0] < i <= rng[1]:
-                all_data[clmn_target][j] = data_lst[1]
-            elif rng[1] < i <= rng[2]:
-                all_data[clmn_target][j] = data_lst[2]
-            elif rng[2] < i <= rng[3]:
-                all_data[clmn_target][j] = data_lst[3]
-            else:
-                all_data[clmn_target][j] = data_lst[4]
-
-    print('for class_generator')
-    all_data['AgeClass'] = 0
-    class_generator('Age', 'AgeClass', [25, 38, 51, 59], [1,2,3,4,5])
-
-    all_data['GlucoClass'] = 0
-    class_generator('Glucose', 'GlucoClass', [60, 80, 140, 180], [4,2,1,3,5])
-
-    all_data['BPClass'] = 0
-    class_generator('BloodPressure', 'BPClass', [60, 75, 90, 100], [4,2,1,3,5])
-
-    all_data['BMIClass'] = 0
-    class_generator('BMI', 'BMIClass', [18, 24, 30, 38], [2,1,3,4,5])
-else:
-    print('object to numeric converter : deactiveted\n')
-    p_description +='\nobject to numeric converter : deactiveted\n'
-
-
-if controler.save_column_name:
-    # get only column names and transposes(T) row into columns
-    cName_all_data = all_data.head(0).T
-    cName_all_data.to_csv(path+'save_column_names.csv')
-    print('Columns names saved at :'+path+'save_column_names.csv')
-    p_description +='\nColumns names saved at :'+path+'save_column_names.csv'
-
-if controler.save_all_data:
-    all_data.to_csv(path+'all_data_secondary.csv')
-    print('\nAll modified data has been saved at : '+path+'all_data_secondary.csv')
-    p_description +='\n\nAll modified data has been saved at : '+path+'all_data_secondary.csv'
-
 ########################################  Heat Map : 2 ##############################################
-if controler.hit_map > 1:
+hit_map_raw_dataset = all_data
+hit_map_raw_dataset['Outcome'] = raw_dataset['Outcome']
+
+if controler.hit_map == 2:
     # Complete numerical correlation matrix
-    corrmat = all_data.corr()
+    corrmat = hit_map_raw_dataset.corr()
     f, ax = plt.subplots(figsize=(20, 13))
     sns.heatmap(corrmat, vmax=1, square=True)
     plt.show()
@@ -243,7 +251,7 @@ if controler.hit_map > 1:
     # Partial numerical correlation matrix (Outcome)
     corr_num = 15  # number of variables for heatmap
     cols_corr = corrmat.nlargest(corr_num, 'Outcome')['Outcome'].index
-    corr_mat_sales = np.corrcoef(all_data[cols_corr].values.T)
+    corr_mat_sales = np.corrcoef(hit_map_raw_dataset[cols_corr].values.T)
     f, ax = plt.subplots(figsize=(20, 15))
     hm = sns.heatmap(corr_mat_sales, cbar=True, annot=True, square=True, fmt='.2f',
                      annot_kws={'size': 7}, yticklabels=cols_corr.values,
@@ -251,7 +259,14 @@ if controler.hit_map > 1:
     print("hit_map 2 : 1")
     p_description +="\nhit_map 2 : 1"
     plt.show()
-#________________________________________________________________________________________________
+
+##################################### numerical relationship ################################
+if controler.check_outliars_numeric_relation == 3:
+    numerics_outliars = ['Glucose', 'BMI', 'Age', 'DiabetesPedigreeFunction']
+    for i in numerics_outliars:
+        checker_v2.numerical_relationship(train, i)
+
+##################################### data split #################################################
 
 df_train = all_data.iloc[:len(y_train), :]
 df_test = all_data.iloc[len(df_train):, :]
@@ -262,6 +277,7 @@ y_train = df_train.Outcome.reset_index(drop=True)
 final_train = df_train.drop(['Outcome'], axis = 1)
 final_test = df_test
 
+####################################### over fit handinig ####################################
 overfit = []
 for i in final_train.columns:
     counts = final_train[i].value_counts()
@@ -272,10 +288,18 @@ for i in final_train.columns:
 overfit = list(overfit)
 
 print('overfit : ', overfit)
+
+############################ final shape #####################################################
 final_train = final_train.drop(overfit, axis=1).copy()
 final_test = final_test.drop(overfit, axis=1).copy()
 
 print('final shape (df_train, y_train, df_test): ',final_train.shape,y_train.shape,final_test.shape)
+
+######################################### histogram : 2 #######################################
+if controler.histogram_show == 2:
+    checker_v2.histogram_show(hit_map_raw_dataset)
+    checker_v2.histogram_show(final_train)
+    checker_v2.histogram_show(final_test)
 
 def get_train_label():
     print("y_train of get_train_label():", y_train.shape)
@@ -307,5 +331,7 @@ def project_description(description):
         print('process_description has been saved at : '+path+'process_description.txt')
         p_description +='\nprocess_description has been saved at : '+path+'process_description.txt'
         file.close()
+
+    
 if controler.local_project_description:
     project_description('')

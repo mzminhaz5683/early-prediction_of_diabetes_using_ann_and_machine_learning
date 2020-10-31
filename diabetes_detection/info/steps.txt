@@ -4,3 +4,4 @@ data minig:
     result.csv (Y):         copy Id column, cut outcome column of test & marge them into new csv file 
 
 data processing:
+    
