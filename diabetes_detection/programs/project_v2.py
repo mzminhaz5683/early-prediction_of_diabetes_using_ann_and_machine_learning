@@ -52,7 +52,10 @@ if controler.hit_map:
     print("\n\n hit_map_raw_dataset 1 : 1------\n\n")
     plt.show()
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if controler.histogram_show == 1:
+    checker_v2.histogram_show(raw_dataset)
+    checker_v2.histogram_show(train)
+    checker_v2.histogram_show(test)
 ######################################## 2. Out-liars Handling #########################################
 #..............................2a numerical analyzing...................................
 if controler.check_outliars_numeric == 1:
@@ -145,13 +148,6 @@ else:
     print('multi level data handling : 0\n')
     p_description +='\multi level data handling : 0\n'
 
-p_description +='\nskew removed\n'
-if controler.save_all_data:
-    all_data.to_csv(path+'all_data_secondary.csv')
-    print('\nAll modified data has been saved at : '+path+'all_data_secondary.csv')
-    p_description +='\n\nAll modified data has been saved at : '+path+'all_data_secondary.csv'
-
-
 ############################## adding new feature ######################################
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ missing data ccheck again~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if controler.missing_data:
@@ -187,38 +183,38 @@ if controler.skw_log:
     # Retrive column names
     df_merged_num_scaled = pd.DataFrame(data = df_merged_num_scaled, columns = df_merged_num.columns, index = df_merged_num.index)
 
+####################### skewed & log1p on numerical features ###########################################
 
 if controler.class_conversion:
     #class creation
-    df_merged_cat = all_data
-    dic = {'Grvl': 3, 'Pave': 6, 'NA': 0, 'None' : 0}
-    df_merged_cat['Alley'] = checker_v2.data_converter(dic, df_merged_cat, 'Alley')
 
-    dic = {'Ex': 5, 'Gd': 4, 'TA': 3, 'Fa': 2, 'Po': 1, 'NA': 0, 'None' : 0}
-    df_merged_cat['FireplaceQu'] = checker_v2.data_converter(dic, df_merged_cat, 'FireplaceQu')
+    def class_generator(clmn, clmn_target, rng, data_lst):
+        j = -1
+        for i in all_data[clmn]:
+            j += 1
+            if i <= rng[0]:
+                all_data[clmn_target][j] = data_lst[0]
+            elif rng[0] < i <= rng[1]:
+                all_data[clmn_target][j] = data_lst[1]
+            elif rng[1] < i <= rng[2]:
+                all_data[clmn_target][j] = data_lst[2]
+            elif rng[2] < i <= rng[3]:
+                all_data[clmn_target][j] = data_lst[3]
+            else:
+                all_data[clmn_target][j] = data_lst[4]
 
-    dic = {'Ex': 5, 'Gd': 4, 'TA': 3, 'Fa': 2, 'Po': 1, 'NA': 0, 'None' : 0}
-    df_merged_cat['GarageQual'] = checker_v2.data_converter(dic, df_merged_cat, 'GarageQual')
+    print('for class_generator')
+    all_data['AgeClass'] = 0
+    class_generator('Age', 'AgeClass', [25, 38, 51, 59], [1,2,3,4,5])
 
-    dic = {'Ex': 5, 'Gd': 4, 'TA': 3, 'Fa': 2, 'Po': 1, 'NA': 0, 'None' : 0}
-    df_merged_cat['BsmtQual'] = checker_v2.data_converter(dic, df_merged_cat, 'BsmtQual')
+    all_data['GlucoClass'] = 0
+    class_generator('Glucose', 'GlucoClass', [60, 80, 140, 180], [4,2,1,3,5])
 
-    dic = {'Ex': 5, 'Gd': 4, 'TA': 3, 'Fa': 2, 'Po': 1, 'NA': 0, 'None' : 0}
-    df_merged_cat['GarageCond'] = checker_v2.data_converter(dic, df_merged_cat, 'GarageCond')
+    all_data['BPClass'] = 0
+    class_generator('BloodPressure', 'BPClass', [60, 75, 90, 100], [4,2,1,3,5])
 
-    dic = {'Ex': 5, 'Gd': 4, 'TA': 3, 'Fa': 2, 'Po': 1, 'NA': 0, 'None' : 0}
-    df_merged_cat['BsmtCond'] = checker_v2.data_converter(dic, df_merged_cat, 'BsmtCond')
-
-    dic = {'Fin': 3, 'RFn': 2, 'Unf': 1, 'NA': 0, 'None' : 0}
-    df_merged_cat['GarageFinish'] = checker_v2.data_converter(dic, df_merged_cat, 'GarageFinish')
-
-
-    '''Extract label encoded variables'''
-    df_merged_label_encoded = df_merged_cat.select_dtypes(include=['int64'])
-
-
-    '''Finally join processed categorical and numerical variables'''
-    all_data = pd.concat([df_merged_num_scaled, df_merged_label_encoded], axis=1)
+    all_data['BMIClass'] = 0
+    class_generator('BMI', 'BMIClass', [18, 24, 30, 38], [2,1,3,4,5])
 else:
     print('object to numeric converter : deactiveted\n')
     p_description +='\nobject to numeric converter : deactiveted\n'
@@ -231,17 +227,15 @@ if controler.save_column_name:
     print('Columns names saved at :'+path+'save_column_names.csv')
     p_description +='\nColumns names saved at :'+path+'save_column_names.csv'
 
-
-df_train = all_data.iloc[:len(y_train), :]
-df_test = all_data.iloc[len(df_train):, :]
-df_train['Outcome'] = y_train
-
-
+if controler.save_all_data:
+    all_data.to_csv(path+'all_data_secondary.csv')
+    print('\nAll modified data has been saved at : '+path+'all_data_secondary.csv')
+    p_description +='\n\nAll modified data has been saved at : '+path+'all_data_secondary.csv'
 
 ########################################  Heat Map : 2 ##############################################
 if controler.hit_map > 1:
     # Complete numerical correlation matrix
-    corrmat = df_train.corr()
+    corrmat = all_data.corr()
     f, ax = plt.subplots(figsize=(20, 13))
     sns.heatmap(corrmat, vmax=1, square=True)
     plt.show()
@@ -249,7 +243,7 @@ if controler.hit_map > 1:
     # Partial numerical correlation matrix (Outcome)
     corr_num = 15  # number of variables for heatmap
     cols_corr = corrmat.nlargest(corr_num, 'Outcome')['Outcome'].index
-    corr_mat_sales = np.corrcoef(df_train[cols_corr].values.T)
+    corr_mat_sales = np.corrcoef(all_data[cols_corr].values.T)
     f, ax = plt.subplots(figsize=(20, 15))
     hm = sns.heatmap(corr_mat_sales, cbar=True, annot=True, square=True, fmt='.2f',
                      annot_kws={'size': 7}, yticklabels=cols_corr.values,
@@ -259,8 +253,11 @@ if controler.hit_map > 1:
     plt.show()
 #________________________________________________________________________________________________
 
+df_train = all_data.iloc[:len(y_train), :]
+df_test = all_data.iloc[len(df_train):, :]
+df_train['Outcome'] = y_train
 
-#################################### creating dummy & de-couple all_data #########################
+#################################### de-couple all_data ####################################
 y_train = df_train.Outcome.reset_index(drop=True)
 final_train = df_train.drop(['Outcome'], axis = 1)
 final_test = df_test

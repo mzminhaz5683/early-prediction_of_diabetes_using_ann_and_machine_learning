@@ -46,6 +46,10 @@ def general_distribution(file, cell):
     res = stats.probplot(file[file[cell]>0][cell], plot=plt)
 
 
+def histogram_show(dataset):
+    dataset.hist(bins=50, figsize=(20, 15))
+    plt.show()
+
 ########################################### Out-liars Handling ############################################
 
 #.....Relationship with numerical variables of Outcome (Bivariate analysis)
