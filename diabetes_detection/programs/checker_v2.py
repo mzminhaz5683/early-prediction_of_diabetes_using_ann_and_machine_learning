@@ -38,33 +38,46 @@ def partial(group, relation):
 
 ##################################### distribution handling ##############################################
 
+# check hit_map
+def hitmap(dataset, target_column):
+    # Complete numerical correlation matrix
+    corrmat = dataset.corr()
+    f, ax = plt.subplots(figsize=(20, 25))
+    sns.heatmap(corrmat, vmax=1, square=True)
+    plt.show()
+
+    # Partial numerical correlation matrix (target_column)
+    corr_num = 15 #number of variables for heatmap
+    cols_corr = corrmat.nlargest(corr_num, target_column)[target_column].index
+    corr_mat_sales = np.corrcoef(dataset[cols_corr].values.T)
+    f, ax = plt.subplots(figsize=(20, 15))
+    hm = sns.heatmap(corr_mat_sales, cbar=True, annot=True, square=True, fmt='.2f',
+                annot_kws={'size': 7}, yticklabels=cols_corr.values, xticklabels=cols_corr.values)
+    plt.show()
+
+#checking histogram
+def hist_plot(dataset):
+    dataset.hist(bins=50, figsize=(20, 15))
+    plt.show()
+
+#checking skew
+def skew_plot(column):
+    plt.figure()
+    sns.distplot(column)
+    plt.show()
+
+#checking outliars
+def scatter_plot(file, var):
+    data = pd.concat([file['Outcome'], file[var]], axis=1)
+    data.plot.scatter(x=var, y='Outcome', ylim=(0, 1))
+    plt.show()
+
 # Checking distribution (histogram and normal probability plot)
 def general_distribution(file, cell):
     plt.subplot(1, 2, 1)
     sns.distplot(file[file[cell]>0][cell], fit=norm)
     fig = plt.figure()
     res = stats.probplot(file[file[cell]>0][cell], plot=plt)
-
-
-def histogram_show(dataset):
-    dataset.hist(bins=50, figsize=(20, 15))
-    plt.show()
-
-########################################### Out-liars Handling ############################################
-
-#.....Relationship with numerical variables of Outcome (Bivariate analysis)
-def numerical_relationship(file, var):
-    data = pd.concat([file['Outcome'], file[var]], axis=1)
-    data.plot.scatter(x=var, y='Outcome', ylim=(0, 1))
-    plt.show()
-
-#.....Relationship with categorical features of Outcome (Bivariate analysis)
-def categorical_relationship(file, var):
-    data = pd.concat([file['Outcome'], file[var]], axis=1)
-    f, ax = plt.subplots(figsize=(8, 6))
-    fig = sns.boxplot(x=var, y="Outcome", data=data)
-    fig.axis(ymin=0, ymax=800000)
-    plt.show()
 
 ################################## categorical(Ordinal) variables handling ###############################
 def data_converter(dic, file, cell):
