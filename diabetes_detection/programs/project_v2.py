@@ -54,22 +54,22 @@ if controler.hit_map == 1 or controler.all:
     #checker_v2.hitmap(train, 'Outcome')
 
 # hist_plot : 1
-if controler.histogram_show == 1 or controler.all:
+if controler.hist_plot == 1 or controler.all:
     checker_v2.hist_plot(all_data)
-    #checker_v2.histogram_show(train)
-    #checker_v2.histogram_show(test)
+    #checker_v2.hist_plot(train)
+    #checker_v2.hist_plot(test)
 
 # skew_plot : 1
-if controler.check_skw == 1 or controler.all:
+if controler.skew_plot == 1 or controler.all:
     for clmn in all_data:
         checker_v2.skew_plot(all_data[clmn], 'prime')
 
 # scatter_plot : 1
-if controler.check_outliars_numeric_relation == 1 or controler.all:
+if controler.scatter_plot == 1 or controler.all:
     for i in train:
         checker_v2.scatter_plot(train, i)
 #--------------------------------------------------------------------------------------------------
-elif 3 > controler.check_outliars_numeric_relation > 1  or controler.all:
+elif 3 > controler.scatter_plot > 1  or controler.all:
     numerics_outliars = ['Glucose', 'BMI', 'Age', 'DiabetesPedigreeFunction']
     for i in numerics_outliars:
         checker_v2.scatter_plot(train, i)
@@ -137,7 +137,7 @@ else:
 ####################################################################################################
 #                                   data operation - Adding new features
 ####################################################################################################
-if controler.class_conversion  or controler.all:
+if controler.class_creating  or controler.all:
     ###########################~~~~~~class generator function~~~~~##################################
     def class_generator(clmn, clmn_target, rng, data_lst):
         j = -1
@@ -172,7 +172,7 @@ else:
 #                           data checking 2nd time : before transformation
 ####################################################################################################
 # skew_plot : 2
-if controler.check_skw == 2  or controler.all:
+if controler.skew_plot == 2  or controler.all:
     for clmn in all_data:
         checker_v2.skew_plot(all_data[clmn], 'before tranformation')
 
@@ -183,6 +183,18 @@ if controler.missing_data  or controler.all:
 #                                   data operation - transformation
 ####################################################################################################
 if controler.log_normalization_on_target  or controler.all:
+
+    if controler.drop_Pregnancies_Glucose:
+        # taken out 'Pregnancies' as it has 0 elements,
+        # taken out 'Glucose', as it is negatively skewed.
+        Pregnancies = all_data['Pregnancies'] # tracking
+        Glucose = all_data['Glucose'] # tracking
+
+        # dropping
+        all_data.drop(['Pregnancies'], axis=1, inplace=True)
+        all_data.drop(['Glucose'], axis=1, inplace=True)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     # Extract numeric variables merged data
     df_merged_num = all_data.select_dtypes(include = ['int64', 'float64'])
 
@@ -211,6 +223,13 @@ if controler.log_normalization_on_target  or controler.all:
     df_merged_num_scaled = pd.DataFrame(data = df_merged_num_scaled, columns = df_merged_num.columns, index = df_merged_num.index)
 
     all_data = df_merged_num_scaled
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if controler.drop_Pregnancies_Glucose:
+        # Glucose is negatively skewed
+        Glucose = np.sqrt(Glucose)
+        # joining all_data + Pregnancies + Glucose
+        all_data['Pregnancies'] = Pregnancies
+        all_data['Glucoseg'] = Glucose
 ####################################################################################################
 #                                   all_data spliting
 ####################################################################################################
@@ -252,13 +271,13 @@ if controler.hit_map == 2  or controler.all:
     #checker_v2.hitmap(train, 'Outcome')
 
 # hist_plot : 2
-if controler.histogram_show == 2  or controler.all:
+if controler.hist_plot == 2  or controler.all:
     checker_v2.hist_plot(all_data)
-    #checker_v2.histogram_show(final_train)
-    #checker_v2.histogram_show(final_test)
+    #checker_v2.hist_plot(final_train)
+    #checker_v2.hist_plot(final_test)
 
 # skew_plot : 3
-if controler.check_skw == 3  or controler.all:
+if controler.skew_plot == 3  or controler.all:
     for clmn in all_data:
         checker_v2.skew_plot(all_data[clmn], 'After transformation')
 ####################################################################################################
