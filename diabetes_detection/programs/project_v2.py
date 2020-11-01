@@ -81,8 +81,8 @@ if controler.missing_data  or controler.all:
 #                                   shaving all_data as prime
 ####################################################################################################
 if controler.save_all_data  or controler.all:
-    all_data.to_csv(path+'all_data_prime.csv')
-    print('\nAll prime data has been saved at : '+path+'all_data_prime.csv\n')
+    all_data.to_csv(path+'all_data prime.csv')
+    print('\nAll prime data has been saved at : '+path+'all_data prime.csv\n')
 
 print('____________________________________________________________________________________')
 print('\nall_data shape (Rows, Columns) & Columns-(ID, Outcome): ', all_data.shape)
@@ -184,7 +184,7 @@ if controler.missing_data  or controler.all:
 ####################################################################################################
 if controler.log_normalization_on_target  or controler.all:
 
-    if controler.drop_Pregnancies_Glucose:
+    if controler.drop_Pregnancies_Glucose  or controler.all:
         # taken out 'Pregnancies' as it has 0 elements,
         # taken out 'Glucose', as it is negatively skewed.
         Pregnancies = all_data['Pregnancies'] # tracking
@@ -224,9 +224,22 @@ if controler.log_normalization_on_target  or controler.all:
 
     all_data = df_merged_num_scaled
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if controler.drop_Pregnancies_Glucose:
+    # need second transformation
+    if controler.transformation_again  or controler.all:
+        all_data['DiabetesPedigreeFunction'] = np.log1p( all_data['DiabetesPedigreeFunction'])
+        all_data['Age'] = np.log1p( all_data['Age'])
         # Glucose is negatively skewed
         Glucose = np.sqrt(Glucose)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # concat Pregnancies & Glucose
+    if controler.drop_Pregnancies_Glucose  or controler.all:
+
+        if controler.transformation_again  or controler.all:
+            Glucose = np.log1p(Glucose)
+        else:
+            # Glucose is negatively skewed
+            Glucose = np.sqrt(Glucose)
+
         # joining all_data + Pregnancies + Glucose
         all_data['Pregnancies'] = Pregnancies
         all_data['Glucoseg'] = Glucose
@@ -284,8 +297,8 @@ if controler.skew_plot == 3  or controler.all:
 #                                   shaving all_data final
 ####################################################################################################
 if controler.save_all_data  or controler.all:
-    all_data.to_csv(path+'all_data_final.csv')
-    print('\nAll prime data has been saved at : '+path+'all_data_final.csv\n')
+    all_data.to_csv(path+'all_data final.csv')
+    print('\nAll prime data has been saved at : '+path+'all_data final.csv\n')
 
 print('____________________________________________________________________________________')
 print('\nall_data shape (Rows, Columns) & Columns-(ID, Outcome): ', all_data.shape)

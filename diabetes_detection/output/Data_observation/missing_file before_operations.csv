@@ -1,4 +1,8 @@
 ,Total,Percent,Data Type
+BMIClass,0,0.0,int64
+BPClass,0,0.0,int64
+GlucoClass,0,0.0,int64
+AgeClass,0,0.0,int64
 Age,0,0.0,int64
 DiabetesPedigreeFunction,0,0.0,float64
 BMI,0,0.0,float64
