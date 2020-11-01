@@ -36,14 +36,14 @@ def partial(group, relation):
     var2.to_csv(path + 'partial.csv')
     print("partial relation data has been stored in : partial.csv")
 
-##################################### distribution handling ##############################################
+##################################### distribution observation ##############################################
 
 # check hit_map
 def hitmap(dataset, target_column):
     # Complete numerical correlation matrix
     corrmat = dataset.corr()
     f, ax = plt.subplots(figsize=(20, 25))
-    sns.heatmap(corrmat, vmax=1, square=True)
+    sns.heatmap(corrmat, vmax=1, square=True, )
     plt.show()
 
     # Partial numerical correlation matrix (target_column)
@@ -61,9 +61,9 @@ def hist_plot(dataset):
     plt.show()
 
 #checking skew
-def skew_plot(column):
+def skew_plot(column, label):
     plt.figure()
-    sns.distplot(column)
+    sns.distplot(column, label=label)
     plt.show()
 
 #checking outliars
@@ -78,8 +78,3 @@ def general_distribution(file, cell):
     sns.distplot(file[file[cell]>0][cell], fit=norm)
     fig = plt.figure()
     res = stats.probplot(file[file[cell]>0][cell], plot=plt)
-
-################################## categorical(Ordinal) variables handling ###############################
-def data_converter(dic, file, cell):
-    file[cell] = file[cell].replace(dic)
-    return file[cell].astype(float)

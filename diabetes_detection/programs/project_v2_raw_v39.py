@@ -227,6 +227,7 @@ if controler.skw_log:
     # Retrive column names
     df_merged_num_scaled = pd.DataFrame(data = df_merged_num_scaled, columns = df_merged_num.columns, index = df_merged_num.index)
 
+    all_data = df_merged_num_scaled
 ########################################  Heat Map : 2 ##############################################
 hit_map_raw_dataset = all_data
 hit_map_raw_dataset['Outcome'] = raw_dataset['Outcome']

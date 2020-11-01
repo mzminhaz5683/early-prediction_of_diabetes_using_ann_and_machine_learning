@@ -1,28 +1,21 @@
-file_description = 1
-file_open_order = 'w'
+all = 1 #0/1
+
+check_outliars_numeric_relation = 3 #0/1/2/3
+class_conversion = 1 # 0/1
+check_skw = 3 #0/1/2/3
 
 
-# value; = 1 for all & = 2 for partial & = 3 for partial after skew & log1p
-check_outliars_numeric_relation = 0
-column_value_use_counter = 0
-class_conversion = 1
-check_skw = 1
+histogram_show = 2 #0/1/2
+hit_map = 2 #0/1/2
 
 
-histogram_show = 0
-hit_map = 3 # value >1 for 2 hit map : raw_dataset, train
-
-
-log_normalization_on_target = 0 # binary outcome class
-local_project_description = 1
+log_normalization_on_target = 1 #0/1
 
 
 
-multi_level_Data_Handling = 1
-missing_data = 0
+multi_level_Data_Handling = 1 #0/1
+missing_data = 2 #0/1/2
 
 
-single_level_Data_Handling = 0
-save_column_name = 0
-save_all_data = 1
-skw_log = 0
+save_column_name = 1 #0/1
+save_all_data = 1 #0/1

@@ -1,8 +1,0 @@
-~~~~~~~~~~~~~~~~~~~~~~~ Project file data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-All prime data has been saved at : '+path+'all_data_prime.csv
-\multi level data handling : 1
-
-
-All modified data has been saved at : ./output/Data_observation/all_data_secondary.csv
