@@ -2,6 +2,7 @@
 clear
 
 python3 -m programs.project_v2
+#python3 -m programs.project_model_v1
 
 
 #kill -9 PID

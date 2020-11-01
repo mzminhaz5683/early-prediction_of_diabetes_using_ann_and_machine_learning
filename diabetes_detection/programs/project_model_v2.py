@@ -21,13 +21,13 @@ pd.set_option('display.float_format', lambda x: '{:.4f}'.format(x))
 # import local files & performance parameters
 # noinspection PyBroadException
 try:
-    f_counter = open('../output/contents/model_counter.txt', 'r')
+    f_counter = open('./output/contents/model_counter.txt', 'r')
     counter = int(f_counter.read())
     f_counter.close()
 except:
     counter = 0
 
-f_counter = open('../output/contents/model_counter.txt', 'w')
+f_counter = open('./output/contents/model_counter.txt', 'w')
 counter = str(counter+1)
 f_counter.write(counter)
 f_counter.close()
@@ -69,7 +69,7 @@ def rmsle(y, y_pred):
     return np.sqrt(mean_squared_error(y, y_pred))
 
 
-# build our model scoring function
+# build model scoring function
 def cv_rmse(model, X=X):
     rmse = np.sqrt(-cross_val_score(model, X, y, scoring="neg_mean_squared_error", cv=kfolds))
     return rmse
@@ -189,7 +189,7 @@ rmse = rmsle(y, blend_models_predict(X))
 print(rmse)
 description += 'RMSLE score on train data : {0} ~> 0.0576\n'.format(rmse)
 
-submission = pd.read_csv("../input/sample_submission.csv")
+submission = pd.read_csv("./input/sample_submission.csv")
 
 temp = file_formate
 file_formate = "_r{0}_e{1}".format(random_state, n_estimator)+temp
@@ -199,33 +199,33 @@ if templates_activator:
     template_weight = 0
     for i in range(0, len(sbmsn_tmplt)):
         template_weight += sbmsn_tmplt[i][0]
-        lst.append(pd.read_csv('../output/submission_template/'+sbmsn_tmplt[i][1]+'.csv'))
+        lst.append(pd.read_csv('./output/submission_template/'+sbmsn_tmplt[i][1]+'.csv'))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    submission['SalePrice'] = (     (1.0-template_weight) *
+    submission['Outcome'] = (     (1.0-template_weight) *
                                     np.expm1(blend_models_predict(X_test))      )
 
     for i in range(0, len(sbmsn_tmplt)):
-        submission['SalePrice'] += (sbmsn_tmplt[i][0] * lst[i].iloc[:,1])
+        submission['Outcome'] += (sbmsn_tmplt[i][0] * lst[i].iloc[:,1])
 
-    submission['SalePrice'] = np.floor(submission['SalePrice'])
+    submission['Outcome'] = np.floor(submission['Outcome'])
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-
 
     temp = file_formate
     file_formate = '_with_{0}t'.format(len(sbmsn_tmplt))+temp
 else:
-    submission['SalePrice'] = np.floor(np.expm1(blend_models_predict(X_test)))
+    submission['Outcome'] = np.floor(np.expm1(blend_models_predict(X_test)))
     temp = file_formate
     file_formate = '_with_0t'+temp
 ######################################## Brutal approach ##########################################
 # Brutal approach to deal with predictions close to outer range 
-q1 = submission['SalePrice'].quantile(0.0042)
-q2 = submission['SalePrice'].quantile(0.99)
+q1 = submission['Outcome'].quantile(0.0042)
+q2 = submission['Outcome'].quantile(0.99)
 
-submission['SalePrice'] = submission['SalePrice'].apply(lambda x: x if x > q1 else x*0.77)
-submission['SalePrice'] = submission['SalePrice'].apply(lambda x: x if x < q2 else x*1.1)
+submission['Outcome'] = submission['Outcome'].apply(lambda x: x if x > q1 else x*0.77)
+submission['Outcome'] = submission['Outcome'].apply(lambda x: x if x < q2 else x*1.1)
 ######################################## result ###################################################
 
-submission.to_csv("../output/"+output+file_formate, index=False)
+submission.to_csv("./output/"+output+file_formate, index=False)
 print('________________Stage finished : {0}___________________'.format(counter))
 print('Submissin sucessfull saved in output with the name')
 print(' ~>> '+output+file_formate)

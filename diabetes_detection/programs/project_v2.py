@@ -44,9 +44,10 @@ all_data = pd.concat([df_train, df_test]).reset_index(drop=True) # concatenation
 ####################################################################################################
 #                                   data checking
 ####################################################################################################
-print("\n\n~~~~~~~~~Prime~~~~~~~~~~~\n")
-print(all_data.dtypes)
-print("\n~~~~~~~~~Prime~~~~~~~~~~~\n\n")
+#data skewness
+print("\n __________ prime skewness __________ ")
+print(all_data.skew())
+print(" __________ ______________ __________ \n")
 
 # hit_map : 1
 if controler.hit_map == 1 or controler.all:
@@ -84,7 +85,7 @@ if controler.save_all_data  or controler.all:
     all_data.to_csv(path+'all_data prime.csv')
     print('\nAll prime data has been saved at : '+path+'all_data prime.csv\n')
 
-print('____________________________________________________________________________________')
+print('__________________________________________________________________________________________')
 print('\nall_data shape (Rows, Columns) & Columns-(ID, Outcome): ', all_data.shape)
 ####################################################################################################
 #                                   data operation - Multi level missing data handling
@@ -255,7 +256,7 @@ y_train = df_train.Outcome.reset_index(drop=True)
 final_train = df_train.drop(['Outcome'], axis = 1)
 final_test = df_test
 
-##############################~~~~~~over fit handinig~~~~~#########################################
+##############################~~~~~~over fit handinig~~~~~##########################################
 overfit = []
 for i in final_train.columns:
     counts = final_train[i].value_counts()
@@ -267,14 +268,16 @@ overfit = list(overfit)
 print('overfit : ', overfit)
 final_train = final_train.drop(overfit, axis=1).copy()
 final_test = final_test.drop(overfit, axis=1).copy()
-print('____________________________________________________________________________________')
-print('final shape (df_train, y_train, df_test): ',final_train.shape,y_train.shape,final_test.shape)
+print('__________________________________________________________________________________________')
+print('\nfinal shape (df_train, y_train, df_test): ',final_train.shape,y_train.shape,final_test.shape)
 ####################################################################################################
 #                                   data checking for 3rd time
 ####################################################################################################
-print("\n\n~~~~~~~~~~2nd~~~~~~~~~~\n")
-print(all_data.dtypes)
-print("\n~~~~~~~~~~2nd~~~~~~~~~~\n\n")
+# final data skewness
+print("\n __________ final skewness __________ ")
+print(all_data.skew())
+print(" __________ ______________ __________ \n")
+
 raw_dataset_2nd = all_data
 raw_dataset_2nd['Outcome'] = raw_dataset['Outcome']
 
@@ -300,8 +303,9 @@ if controler.save_all_data  or controler.all:
     all_data.to_csv(path+'all_data final.csv')
     print('\nAll prime data has been saved at : '+path+'all_data final.csv\n')
 
-print('____________________________________________________________________________________')
+print('__________________________________________________________________________________________')
 print('\nall_data shape (Rows, Columns) & Columns-(ID, Outcome): ', all_data.shape)
+print('\n\n')
 ####################################################################################################
 #                                   functions of modeling
 ####################################################################################################
@@ -316,3 +320,12 @@ def get_test_ID():
 def get_train_test_data():
     print('Shape of get_train_test_data(): ', final_train.shape, y_train.shape, final_test.shape)
     return final_train, final_test
+
+def project_description(description):
+    if controler.file_description:
+        description += '~~~~~~~~~~~~~~~~~~~~~~~ Project file data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n'
+        file = open(path+'model_description.txt', 'w')
+        file.write(description)
+        print('__________________________________________________________________________________________')
+        print('\nmodel_description has been saved at : '+path+'model_description.txt')
+        file.close()
