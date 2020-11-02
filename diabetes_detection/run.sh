@@ -1,8 +1,8 @@
 #!/bin/bash
 clear
 
-#python3 -m programs.project_v2
-python3 -m programs.project_model_v3
+python3 -m programs.project_v2
+#python3 -m programs.project_model_v3
 
 
 #kill -9 PID

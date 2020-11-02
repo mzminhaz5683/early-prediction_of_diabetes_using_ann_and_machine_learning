@@ -81,13 +81,11 @@ if controler.save_all_data  or controler.all:
     print('\nAll prime data has been saved at : '+path+'all_data prime.csv\n')
 
 print('__________________________________________________________________________________________')
-print('\nall_data shape (Rows, Columns) & Columns-(ID, Outcome): ', all_data.shape)
+print('\nprime :: all_data shape (Rows, Columns) & Columns-(without :: Id, Outcome, classes): ', all_data.shape)
 ####################################################################################################
 #                                   data operation - Multi level missing data handling
 ####################################################################################################
 if controler.multi_level_Data_Handling  or controler.all:
-    print('multi level data handling : on\n')
-
     ###############~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##########################################
     #                               multi-level data handle function    
     #                clmn, p, w = target_column, parameter_column, parameter_weight
@@ -194,6 +192,9 @@ if controler.log_normalization_on_target  or controler.all:
         # dropping
         all_data.drop(['Pregnancies'], axis=1, inplace=True)
         all_data.drop(['Glucose'], axis=1, inplace=True)
+        
+        # multi layer skew handling
+        Glucose = np.log1p(np.sqrt(Glucose)) # 'GlucoClass' : stays at chipest skew at this stage
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if 1:
@@ -226,22 +227,20 @@ if controler.log_normalization_on_target  or controler.all:
 
         all_data = df_merged_num_scaled
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # 'GlucoClass' : stays at chipest skew at this stage
-
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # need second transformation
     if controler.transformation_again  or controler.all:
         all_data['Age'] = np.log1p( all_data['Age'])
-        all_data['Insulin'] = np.log1p( all_data['Insulin'])
 
         all_data['AgeClass'] = np.log1p( all_data['AgeClass'])
         all_data['BPClass'] = np.log1p( all_data['BPClass'])
 
         # negatively skewed now
         all_data['BMIClass'] = np.sqrt( all_data['BMIClass']) # becomes constant at this stage
+        all_data['SkinThickness'] = np.sqrt( all_data['SkinThickness']) # 'SkinThickness' : stays at chipest skew at this stage
 
         # multi layer skew handling
-        Glucose = np.log1p(np.sqrt(Glucose))
+        all_data['Insulin'] = np.log1p( np.log1p( all_data['Insulin']))
         all_data['DiabetesPedigreeFunction'] = np.sqrt( np.log1p( all_data['DiabetesPedigreeFunction']))
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -249,7 +248,8 @@ if controler.log_normalization_on_target  or controler.all:
     if controler.drop_Pregnancies_Glucose  or controler.all:
         all_data['Pregnancies'] = Pregnancies
         all_data['Glucoseg'] = Glucose
-        
+    
+    skew_info = 'BMIClass : constant, SkinThickness : Chipest, Pregnancies : contain 0'
 ####################################################################################################
 #                                   all_data spliting
 ####################################################################################################
@@ -271,10 +271,9 @@ for i in final_train.columns:
         overfit.append(i)
 
 overfit = list(overfit)
-print('overfit : ', overfit)
+print('dropping overfits : ', overfit)
 final_train = final_train.drop(overfit, axis=1).copy()
 final_test = final_test.drop(overfit, axis=1).copy()
-print('__________________________________________________________________________________________')
 print('\nfinal shape (df_train, y_train, df_test): ',final_train.shape,y_train.shape,final_test.shape)
 ####################################################################################################
 #                                   data checking for 3rd time
@@ -283,6 +282,8 @@ print('\nfinal shape (df_train, y_train, df_test): ',final_train.shape,y_train.s
 print("\n __________ final skewness __________ ")
 print(all_data.skew())
 print(" __________ ______________ __________ \n")
+print(skew_info)
+
 
 raw_dataset_2nd = all_data
 raw_dataset_2nd['Outcome'] = raw_dataset['Outcome']
@@ -310,8 +311,8 @@ if controler.save_all_data  or controler.all:
     print('\nAll prime data has been saved at : '+path+'all_data final.csv\n')
 
 print('__________________________________________________________________________________________')
-print('\nall_data shape (Rows, Columns) & Columns-(ID, Outcome): ', all_data.shape)
-print('\n\n')
+print('\nfinal :: all_data shape (Rows, Columns) & Columns-(without :: Id only): ', all_data.shape)
+print('\n')
 ####################################################################################################
 #                                   functions of modeling
 ####################################################################################################
