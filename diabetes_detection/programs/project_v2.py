@@ -13,6 +13,8 @@ from sklearn.preprocessing import RobustScaler
 warnings.filterwarnings('ignore')
 
 skew_info = ''
+#Limiting floats output to 2 decimal point(s) after dot(.)
+pd.set_option('display.float_format', lambda x: '{:.2f}'.format(x))
 ####################################################################################################
 #                                   import local file
 ####################################################################################################
@@ -44,33 +46,34 @@ all_data = pd.concat([df_train, df_test]).reset_index(drop=True) # concatenation
 #                                   data checking
 ####################################################################################################
 # hit_map : 1
-if controler.hit_map == 1 or controler.all:
-    checker_v2.hitmap(raw_dataset, 'Outcome')
+if 0<(controler.hit_map -1+1) or controler.all:
+    checker_v2.hitmap(raw_dataset, 'Outcome', 'raw_dataset_Prime')
     #checker_v2.hitmap(train, 'Outcome')
 
 # hist_plot : 1
-if controler.hist_plot == 1 or controler.all:
-    checker_v2.hist_plot(all_data)
+if 0<(controler.hist_plot -1+1) or controler.all:
+    checker_v2.hist_plot(all_data, 'All_Data_Prime')
     #checker_v2.hist_plot(train)
     #checker_v2.hist_plot(test)
 
 # skew_plot : 1
-if controler.skew_plot == 1 or controler.all:
+if 0<(controler.skew_plot -1+1) or controler.all:
     for clmn in all_data:
         checker_v2.skew_plot(all_data[clmn], 'prime')
 
 # scatter_plot : 1
-if controler.scatter_plot == 1 or controler.all:
-    for i in train:
-        checker_v2.scatter_plot(train, i)
+numerics_outliars = train
+if 0<(controler.scatter_plot -1+1) or controler.all:
+    for i in numerics_outliars:
+        checker_v2.scatter_plot(numerics_outliars, i, 'prime : '+i)
 #--------------------------------------------------------------------------------------------------
-elif 3 > controler.scatter_plot > 1  or controler.all:
+elif 0<(controler.scatter_plot -2+1)  or controler.all:
     numerics_outliars = ['Glucose', 'BMI', 'Age', 'DiabetesPedigreeFunction']
     for i in numerics_outliars:
-        checker_v2.scatter_plot(train, i)
+        checker_v2.scatter_plot(train, i, 'prime : '+i)
 
 # missing data checking : 1
-if controler.missing_data  or controler.all:
+if 0<(controler.missing_data -1+1) or controler.all:
     checker_v2.missing_data(all_data, controler.save_column_name)
 ####################################################################################################
 #                                   shaving all_data as prime
@@ -151,25 +154,30 @@ if controler.class_creating  or controler.all:
     class_generator('Age', 'AgeClass', [25, 38, 51, 59], [1,2,3,4,5])
 
     all_data['GlucoClass'] = 0
-    class_generator('Glucose', 'GlucoClass', [60, 80, 140, 180], [3,1,2,4,5])
+    class_generator('Glucose', 'GlucoClass', [60, 80, 140, 180], [2,1,3,4,5])
 
     all_data['BPClass'] = 0
-    class_generator('BloodPressure', 'BPClass', [60, 75, 90, 100], [4,2,1,3,5])
+    class_generator('BloodPressure', 'BPClass', [60, 75, 90, 100], [1,2,3,4,5])
 
     all_data['BMIClass'] = 0
-    class_generator('BMI', 'BMIClass', [18, 24, 30, 38], [2,1,3,4,5])
+    class_generator('BMI', 'BMIClass', [18, 25, 30, 40], [1,2,3,4,5])
 else:
     print('object to numeric converter : deactiveted\n')
 ####################################################################################################
 #                           data checking 2nd time : before transformation
 ####################################################################################################
 # skew_plot : 2
-if controler.skew_plot == 2  or controler.all:
+if 0<(controler.skew_plot -2+1)  or controler.all:
     for clmn in all_data:
-        checker_v2.skew_plot(all_data[clmn], 'before tranformation')
+        checker_v2.skew_plot(all_data[clmn], 'Before tranformation')
+
+# scatter_plot : 1
+if 0<(controler.scatter_plot -3+1) or controler.all:
+    for i in numerics_outliars:
+        checker_v2.scatter_plot(train, i, 'Before tranformation : '+i)
 
 # missing data checking : 2
-if controler.missing_data  or controler.all:
+if 0<(controler.missing_data -2+1)  or controler.all:
     checker_v2.missing_data(all_data, controler.save_column_name + 1)
 ####################################################################################################
 #                                   data operation - transformation
@@ -189,21 +197,32 @@ def normalizer(trnsfrm, id):
 
 if controler.log_normalization_on_target  or controler.all:
     trnsfrm_1 = ['Glucose', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction',
-                 'Age', 'AgeClass', 'GlucoClass', 'BPClass']
+                 'Age', 'AgeClass', 'BPClass']
     normalizer(trnsfrm_1, 1)
 
+    if controler.individual_normalization_show:
+        print("\n __________ trnsfrm_1 __________ ")
+        print(all_data.skew())
+        print(" __________ ______________ __________ \n")
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # SkinThickness : chipest skewed
     trnsfrm_2 = ['Insulin', 'DiabetesPedigreeFunction',
-                 'Age', 'AgeClass', 'GlucoClass', 'BPClass']
+                 'Age', 'AgeClass']
     normalizer(trnsfrm_2, 1)
 
+    if controler.individual_normalization_show:
+        print("\n __________ trnsfrm_2 __________ ")
+        print(all_data.skew())
+        print(" __________ ______________ __________ \n")
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    trnsfrm_3 = ['Insulin', 'DiabetesPedigreeFunction', 'Age', 'GlucoClass']
+    trnsfrm_3 = ['Insulin', 'DiabetesPedigreeFunction', 'Age']
     normalizer(trnsfrm_3, 0)
-
+    
+    if controler.individual_normalization_show:
+        print("\n __________ trnsfrm_3 __________ ")
+        print(all_data.skew())
+        print(" __________ ______________ __________ \n")
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # BMIClass : chipest skewed already
     # Insulin, Age : furthermore transformation gives no significient change
 
 ####################################################################################################
@@ -219,6 +238,7 @@ final_train = df_train.drop(['Outcome'], axis = 1)
 final_test = df_test
 
 ##############################~~~~~~over fit handinig~~~~~##########################################
+#overfit = ['Pregnancies']
 overfit = []
 for i in final_train.columns:
     counts = final_train[i].value_counts()
@@ -245,20 +265,25 @@ raw_dataset_2nd = all_data
 raw_dataset_2nd['Outcome'] = raw_dataset['Outcome']
 
 # hit_map : 2
-if controler.hit_map == 2  or controler.all:
-    checker_v2.hitmap(raw_dataset_2nd, 'Outcome')
+if 0<(controler.hit_map -2+1)  or controler.all:
+    checker_v2.hitmap(raw_dataset_2nd, 'Outcome', 'raw_dataset_2nd_final')
     #checker_v2.hitmap(train, 'Outcome')
 
 # hist_plot : 2
-if controler.hist_plot == 2  or controler.all:
-    checker_v2.hist_plot(all_data)
+if 0<(controler.hist_plot -2+1)  or controler.all:
+    checker_v2.hist_plot(all_data, 'All_data_Final')
     #checker_v2.hist_plot(final_train)
     #checker_v2.hist_plot(final_test)
 
 # skew_plot : 3
-if controler.skew_plot == 3  or controler.all:
+if 0<(controler.skew_plot -3+1) or controler.all:
     for clmn in all_data:
         checker_v2.skew_plot(all_data[clmn], 'After transformation')
+
+# scatter_plot : 1
+if 0<(controler.scatter_plot -4+1) or controler.all:
+    for i in numerics_outliars:
+        checker_v2.scatter_plot(train, i, 'After tranformation : '+i)
 ####################################################################################################
 #                                   shaving all_data final
 ####################################################################################################

@@ -39,12 +39,12 @@ def partial(group, relation):
 ##################################### distribution observation ##############################################
 
 # check hit_map
-def hitmap(dataset, target_column):
+def hitmap(dataset, target_column, tittle):
     # Complete numerical correlation matrix
     corrmat = dataset.corr()
-    f, ax = plt.subplots(figsize=(20, 25))
-    sns.heatmap(corrmat, vmax=1, square=True, )
-    plt.show()
+    #f, ax = plt.subplots(figsize=(20, 25))
+    #sns.heatmap(corrmat, vmax=1, square=True, )
+    #plt.show()
 
     # Partial numerical correlation matrix (target_column)
     corr_num = 15 #number of variables for heatmap
@@ -53,23 +53,27 @@ def hitmap(dataset, target_column):
     f, ax = plt.subplots(figsize=(20, 15))
     hm = sns.heatmap(corr_mat_sales, cbar=True, annot=True, square=True, fmt='.2f',
                 annot_kws={'size': 7}, yticklabels=cols_corr.values, xticklabels=cols_corr.values)
+    plt.title(tittle)
     plt.show()
 
 #checking histogram
-def hist_plot(dataset):
+def hist_plot(dataset, tittle):
     dataset.hist(bins=50, figsize=(20, 15))
+    plt.title(tittle)
     plt.show()
 
 #checking skew
-def skew_plot(column, label):
+def skew_plot(column, tittle):
     plt.figure()
-    sns.distplot(column, label=label)
+    sns.distplot(column)
+    plt.title(tittle)
     plt.show()
 
 #checking outliars
-def scatter_plot(file, var):
+def scatter_plot(file, var, tittle):
     data = pd.concat([file['Outcome'], file[var]], axis=1)
     data.plot.scatter(x=var, y='Outcome', ylim=(0, 1))
+    plt.title(tittle)
     plt.show()
 
 # Checking distribution (histogram and normal probability plot)
