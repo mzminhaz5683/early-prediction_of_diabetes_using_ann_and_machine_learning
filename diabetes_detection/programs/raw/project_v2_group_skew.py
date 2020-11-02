@@ -13,6 +13,8 @@ from sklearn.preprocessing import RobustScaler
 warnings.filterwarnings('ignore')
 
 skew_info = ''
+#Limiting floats output to 2 decimal point(s) after dot(.)
+pd.set_option('display.float_format', lambda x: '{:.2f}'.format(x))
 ####################################################################################################
 #                                   import local file
 ####################################################################################################
@@ -100,6 +102,7 @@ if controler.multi_level_Data_Handling  or controler.all:
                     value = all_data[p[0]][i] * w[0] + all_data[p[1]][i] * w[1] + all_data[p[2]][i] * w[2] + all_data[p[3]][i] * w[3]
                     all_data[clmn][i] = (median + value)//2
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     p = ['BMI', 'Age', 'Insulin']
     w = [0.22, 0.26, 0.33]
     missing_value_handler('Glucose', p, w)
@@ -179,33 +182,75 @@ print("\n __________ prime skewness __________ ")
 print(all_data.skew())
 print(" __________ ______________ __________ \n")
 
-def normalizer(trnsfrm, id):
-    if id:
-        for clmn in trnsfrm:
-            all_data[clmn] = np.log1p(all_data[clmn])
-    else:
-        for clmn in trnsfrm:
-            all_data[clmn] = np.sqrt(all_data[clmn])
-
 if controler.log_normalization_on_target  or controler.all:
-    trnsfrm_1 = ['Glucose', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction',
-                 'Age', 'AgeClass', 'GlucoClass', 'BPClass']
-    normalizer(trnsfrm_1, 1)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # SkinThickness : chipest skewed
-    trnsfrm_2 = ['Insulin', 'DiabetesPedigreeFunction',
-                 'Age', 'AgeClass', 'GlucoClass', 'BPClass']
-    normalizer(trnsfrm_2, 1)
+    if controler.drop_Pregnancies_Glucose  or controler.all:
+        # taking out 'Pregnancies' as it has 0 elements,
+        # taking out 'Glucose', as it is negatively skewed.
+        Pregnancies = all_data['Pregnancies'] # tracking
+        Glucose = all_data['Glucose'] # tracking
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    trnsfrm_3 = ['Insulin', 'DiabetesPedigreeFunction', 'Age', 'GlucoClass']
-    normalizer(trnsfrm_3, 0)
+        # dropping
+        all_data.drop(['Pregnancies'], axis=1, inplace=True)
+        all_data.drop(['Glucose'], axis=1, inplace=True)
+        
+        # multi layer skew handling
+        Glucose = np.log1p(np.sqrt(Glucose)) # 'GlucoClass' : stays at chipest skew at this stage
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # BMIClass : chipest skewed already
-    # Insulin, Age : furthermore transformation gives no significient change
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if 0:
+        # Extract numeric variables merged data
+        df_merged_num = all_data.select_dtypes(include = ['int64', 'float64'])
 
+        # Make the tranformation of the explanetory variables
+        df_merged_skewed = np.log1p(df_merged_num[df_merged_num.skew()[df_merged_num.skew() > 0.5].index])
+
+        # Normal variables
+        df_merged_normal = df_merged_num[df_merged_num.skew()[df_merged_num.skew() < 0.5].index]
+
+        # Merging
+        df_merged_num_all = pd.concat([df_merged_skewed, df_merged_normal], axis=1)
+
+        #Update numerical variables with transformed variables.
+        df_merged_num.update(df_merged_num_all)
+
+        # Creating scaler object.
+        scaler = RobustScaler()
+
+        # Fit scaler object on train data.
+        scaler.fit(df_merged_num)
+
+        # Apply scaler object to both train and test data.
+        df_merged_num_scaled = scaler.transform(df_merged_num)
+
+        # Retrive column names
+        df_merged_num_scaled = pd.DataFrame(data = df_merged_num_scaled, columns = df_merged_num.columns, index = df_merged_num.index)
+
+        all_data = df_merged_num_scaled
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # need second transformation
+    if controler.transformation_again  or controler.all:
+        all_data['Age'] = np.log1p( all_data['Age'])
+
+        all_data['AgeClass'] = np.log1p( all_data['AgeClass'])
+        all_data['BPClass'] = np.log1p( all_data['BPClass'])
+
+        # negatively skewed now
+        all_data['BMIClass'] = np.sqrt( all_data['BMIClass']) # becomes constant at this stage
+        all_data['SkinThickness'] = np.sqrt( all_data['SkinThickness']) # 'SkinThickness' : stays at chipest skew at this stage
+
+        # multi layer skew handling
+        all_data['Insulin'] = np.log1p( np.log1p( all_data['Insulin']))
+        all_data['DiabetesPedigreeFunction'] = np.sqrt( np.log1p( all_data['DiabetesPedigreeFunction']))
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # concat Pregnancies & Glucose
+    if controler.drop_Pregnancies_Glucose  or controler.all:
+        all_data['Pregnancies'] = Pregnancies
+        all_data['Glucoseg'] = Glucose
+    
+    skew_info = 'BMIClass : constant, SkinThickness : Chipest, Pregnancies : contain 0'
 ####################################################################################################
 #                                   all_data spliting
 ####################################################################################################
