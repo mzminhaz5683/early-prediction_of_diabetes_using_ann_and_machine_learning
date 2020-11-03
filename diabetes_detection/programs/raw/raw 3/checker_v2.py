@@ -1,12 +1,11 @@
 # coding=utf-8
 import pandas as pd # data processing, CSV file I/O handler(e.g. pd.read_csv)
-from pandas.plotting import scatter_matrix
+
 import matplotlib.pyplot as plt # data manipulation
 import seaborn as sns # data presentation
 import numpy as np # linear algebra
 from scipy.stats import norm #for some statistics
 from scipy import stats  # scientific notation handler
-from matplotlib import pyplot # hist plot group
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -42,12 +41,12 @@ def partial(group, relation):
 # check hit_map
 def hitmap(dataset, target_column, tittle):
     # Complete numerical correlation matrix
-    if 0:
-        scatter_matrix(dataset,figsize=(20, 15))
-        pyplot.show()
+    corrmat = dataset.corr()
+    #f, ax = plt.subplots(figsize=(20, 25))
+    #sns.heatmap(corrmat, vmax=1, square=True, )
+    #plt.show()
 
     # Partial numerical correlation matrix (target_column)
-    corrmat = dataset.corr()
     corr_num = 15 #number of variables for heatmap
     cols_corr = corrmat.nlargest(corr_num, target_column)[target_column].index
     corr_mat_sales = np.corrcoef(dataset[cols_corr].values.T)
@@ -56,7 +55,6 @@ def hitmap(dataset, target_column, tittle):
                 annot_kws={'size': 7}, yticklabels=cols_corr.values, xticklabels=cols_corr.values)
     plt.title(tittle)
     plt.show()
-
 
 #checking histogram
 def hist_plot(dataset, tittle):
