@@ -31,4 +31,3 @@ n_estimators = 15       # 10 best: 15
 criterion = 'gini'      # entropy , gini best: gini
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 project_version = 3
-combine_machines = 1

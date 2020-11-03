@@ -13,5 +13,6 @@ pip install h5py
 pip install scikit-image
 pip install xgboost
 pip install lightgbm
+pip install -U mlens
 
 

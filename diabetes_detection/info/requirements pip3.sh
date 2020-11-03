@@ -12,3 +12,4 @@ pip3 install h5py
 pip3 install scikit-image
 pip3 install xgboost
 pip3 install lightgbm
+pip3 install -U mlens
