@@ -150,18 +150,37 @@ print('svm_acc : {0:.2f} %'.format(svm_acc))
 dectionary['svm_acc'] = svm_acc
 dectionary_y['svm_acc'] = svm_y
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-max_key = 'dtc_acc'
-for key in dectionary:
-        if dectionary[max_key] < dectionary[key]:
-                max_key = key
 
-acc = dectionary[max_key]
-print('\n\n~~~~~~~~~~~~~~~~~~~~~~~~ max  accuracy ~~~~~~~~~~~~~~~~~~~~~~~~')
-print('{0} : {1:.2f} %'.format(max_key, dectionary[max_key]))
-y_pred = dectionary_y[max_key]
-print('\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+print('\n\n~~~~~~~~~~~~~~~~~~~~~~~ final accuracy ~~~~~~~~~~~~~~~~~~~~~~~')
+
+# selection sort : accending
+lst = [i for i in dectionary.keys()]
+for i in range(0, len(lst)):
+        min = i
+        for j in range(i+1, len(lst)):
+                if dectionary[lst[min]] > dectionary[lst[j]]:
+                        min = j
+        temp = lst[min]
+        lst[min]=lst[i]
+        lst[i] = temp
+print('lst = ', lst)
+if controler.combine_machines:
+        result_y =      np.ceil(dectionary_y[lst[5]]   *       0.40
+                                +dectionary_y[lst[4]]   *       0.20
+                                +dectionary_y[lst[3]]   *       0.15
+                                +dectionary_y[lst[2]]   *       0.10
+                                +dectionary_y[lst[1]]   *       0.09
+                                +dectionary_y[lst[0]]   *       0.06
+                        )
+        acc, y_pred  = accuracy_calculator(result_y)
+        print('combine : {0:.2f} %'.format(acc))
+else:
+        acc = dectionary[lst[-1]]
+        y_pred = dectionary_y[lst[-1]]
+        print('{0} : {1:.2f} %'.format(lst[-1], acc))
+print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 print('             model ends for : {0}'.format(project))
-print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n')
+print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 ####################################################################################################
 #                                   save result
 ####################################################################################################

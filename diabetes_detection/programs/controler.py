@@ -30,4 +30,5 @@ rndm_state = 10         # 0 best: 10
 n_estimators = 15       # 10 best: 15
 criterion = 'gini'      # entropy , gini best: gini
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-project_version = 4
+project_version = 3
+combine_machines = 1
