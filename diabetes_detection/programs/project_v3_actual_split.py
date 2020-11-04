@@ -9,7 +9,6 @@ import seaborn as sns # ----------------data presentation
 
 
 import warnings
-from sklearn.preprocessing import RobustScaler
 warnings.filterwarnings('ignore')
 
 skew_info = ''

@@ -10,7 +10,6 @@ from programs import controler
 #                                   Load project
 ####################################################################################################
 output = 'model'
-SEED = 7
 project = ''
 if controler.project_version == 3:
         from programs import project_v3_actual_split as project_analyser
@@ -52,39 +51,54 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import ExtraTreesClassifier
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def get_models():
+def get_models(lr, knn, svm, dt, ab, gb, g_nb, rf, et):
     """Generate a library of base learners."""
+    models = {}
 
-    param1 = {'C': 0.7678243129497218, 'penalty': 'l1', 'solver': 'liblinear', 'random_state': 10}
-    model1 = LogisticRegression(**param1)
+    if lr:
+        param1 = {'C': 0.7678243129497218, 'penalty': 'l1', 'solver': 'liblinear', 'random_state': 10}
+        model1 = LogisticRegression(**param1)
+        models['Logistic Regression'] = model1
+    
+    if knn:
+        param2 = {'n_neighbors': 4, 'metric': 'minkowski', 'p':2}
+        model2 = KNeighborsClassifier(**param2)
+        models['K Neighbors'] = model2
 
-    param2 = {'n_neighbors': 4, 'metric': 'minkowski', 'p':2}
-    model2 = KNeighborsClassifier(**param2)
-
+    if svm:
     # kernel: linear
-    param3 = {'C': 1.7, 'kernel': 'rbf', 'random_state':  10, 'probability':True}
-    model3 = SVC(**param3)
+        param3 = {'C': 1.7, 'kernel': 'rbf', 'random_state':  10, 'probability':True}
+        model3 = SVC(**param3)
+        models['Support Vector'] = model3
 
-    #param = {'criterion': 'gini', 'max_depth': 3, 'max_features': 2, 'min_samples_leaf': 3}
-    param4 = {'criterion': 'gini', 'max_depth': 3, 'random_state': 10}
-    model4 = DecisionTreeClassifier(**param4)
+    if dt:
+        #param = {'criterion': 'gini', 'max_depth': 3, 'max_features': 2, 'min_samples_leaf': 3}
+        param4 = {'criterion': 'gini', 'max_depth': 3, 'random_state': 10}
+        model4 = DecisionTreeClassifier(**param4)
+        models['Decision Tree'] = model4
 
-    param5 = {'learning_rate': 0.05, 'n_estimators': 150}
-    model5 = AdaBoostClassifier(**param5)
+    if ab:
+        param5 = {'learning_rate': 0.05, 'n_estimators': 150}
+        model5 = AdaBoostClassifier(**param5)
+        models['Ada Boost'] = model5
 
-    param6 = {'learning_rate': 0.01, 'n_estimators': 100}
-    model6 = GradientBoostingClassifier(**param6)
+    if gb:
+        param6 = {'learning_rate': 0.01, 'n_estimators': 100}
+        model6 = GradientBoostingClassifier(**param6)
+        models['Gradient Boost'] = model6
 
-    model7 = GaussianNB()
+    if g_nb:
+        model7 = GaussianNB()
+        models['Naive Bayes (Gaussian)'] = model7
 
-    param8 = {'n_estimators': 15, 'criterion': 'gini', 'random_state':10}
-    model8 = RandomForestClassifier(**param8)
+    if rf:
+        param8 = {'n_estimators': 15, 'criterion': 'gini', 'random_state':10}
+        model8 = RandomForestClassifier(**param8)
+        models['Random Forest'] = model8
 
-    model9 = ExtraTreesClassifier()
-
-    models = {'Logistic Regression':model1, 'K Neighbors':model2, 'Support Vector':model3,
-              'Decision Tree':model4, 'Ada Boost':model5, 'Gradient Boost':model6,
-              'Naive Bayes (Gaussian)':model7, 'Random Forest':model8,  'Extra Trees':model9}
+    if et:
+        model9 = ExtraTreesClassifier()
+        models['Extra Trees'] = model9
               
     return models
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -95,66 +109,47 @@ def accuracy_calculator(y_pred):
         return acc
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def prediction(model_list,X_train, X_test, y_train, y_test):
-    if 1:
-        prediction_set = []
+    prediction_set = []
+    print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+    for i, (name, model) in enumerate(models.items()):
+        print('Predict for ~> ', name)
+        model.fit(X_train, y_train)
+
+        y_pred = model.predict(X_test)
+        #print('predict : ', y_pred[0:10])
+
+        #y_pred2 = model.predict_proba(X_test)
+        #print('predict_proba : ', y_pred2[0:10])
+
+        m_acc = accuracy_calculator(y_pred)
+        prediction_set.append(y_pred)
+
+        print('Model accuracy : {0:.2f} %'.format(m_acc))
         print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-        for i, (name, model) in enumerate(models.items()):
-            print('Predict for ~> ', name)
-            model.fit(X_train, y_train)
 
-            y_pred = model.predict(X_test)
-            print('predict : ', y_pred[0:10])
-
-            y_pred2 = model.predict_proba(X_test)
-            print('predict_proba : ', y_pred2[0:10])
-
-            #y_pred1 = model.predict_log_proba(X_test)
-            #print('predict_log_proba : ', y_pred1[0:10])
-
-            m_acc = accuracy_calculator(y_pred)
-            prediction_set.append(y_pred)
-
-            print('Model accuracy : {0:.2f} %'.format(m_acc))
-            print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-
-    else:
-        """Fit models in list on training set and return preds"""
-        P = np.zeros((y_test.shape[0], len(model_list)))
-        P = pd.DataFrame(P)
-
-        print("Fitting models.")
-        cols = list()
-        for i, (name, m) in enumerate(models.items()):
-            print("%s..." % name, end=" ", flush=False)
-            m.fit(X_train, y_train)
-            P.iloc[:, i] = m.predict_proba(X_test)[:, 1]
-            cols.append(name)
-            print("done")
-
-        P.columns = cols
-        print("Done.\n")
-        return P
+    return prediction_set
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# lr, knn, svm, dt, ab, gb, g_nb, rf, et :: 9
+models = get_models(1, 0, 0, 1, 1, 0, 1, 1, 0)
 
-if 1:
-    models = get_models()
-    P = prediction(models,X_train,X_test,y_train,y_test)
+if 0:
+    prediction_set = prediction(models,X_train,X_test,y_train,y_test)
 else:
-    base_learners = get_models()
+    base_learners = models
     meta_learner = GradientBoostingClassifier(
-        n_estimators=1000,
+        n_estimators=100, # 1000
         loss="exponential",
-        max_features=6,
+        # max_features=6,
         max_depth=3,
         subsample=0.5,
         learning_rate=0.001, 
-        random_state=SEED
+        random_state=10
     )
 
     # Instantiate the ensemble with 10 folds
     sl = SuperLearner(
         folds=10,
-        random_state=SEED,
+        random_state=10,
         verbose=2,
         backend="multiprocessing"
     )
@@ -174,14 +169,14 @@ else:
     pp = []
     for p in p_sl[:, 1]:
         if p>0.5:
-            pp.append(1.)
+            pp.append(1)
         else:
-            pp.append(0.)
+            pp.append(0)
 
     print("\nSuper Learner Accuracy score: %.8f" % (y_test== pp).mean())
-    print(p_sl)
-    #accuracy_calculator(p_sl)
-
+    print(pp)
+    c_acc = accuracy_calculator(pp)
+    print('Combine model accuracy : {0:.2f} %'.format(c_acc))
 ####################################################################################################
 #                                   save result
 ####################################################################################################
