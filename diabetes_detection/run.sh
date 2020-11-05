@@ -1,8 +1,8 @@
 #!/bin/bash
 clear
 
-#python3 -m programs.project_v7_actual_split
-#python3 -m programs.project_v7_random_split
+#python3 -m programs.project_v3_actual_split
+#python3 -m programs.project_v5_random_split
 
 #python3 -m programs.project_model_v4
 #python3 -m programs.project_model_v8
@@ -18,9 +18,13 @@ clear
 
 
 ##################################################################################################
-for ((a=01; a <= 100 ; a++))
+for ((a=01; a <= 1 ; a++))
 do
-python3 -m programs.project_model_v11
+
+#python3 -m programs.project_model_v11
+python3 -m programs.project_v3_actual_split
+
+
 read -t 20 -p "wait for 20 seconds only ..."
 done
 

@@ -83,23 +83,23 @@ def cv_rmse(model):
 # LogisticRegression KNeighborsClassifier SVC2 DecisionTreeClassifier AdaBoostClassifier GradientBoostingClassifier
 # GaussianNB RandomForestClassifier ExtraTreesClassifier
 
-model_weight = []
-#model_weight = [0.1, 0.1, 0.15, 0.1, 0.1, 0.15, 0.3]
+#model_weight = []
+model_weight = [0.1, 0.2, 0.7]
 model_dicty = {'ridgec'         :   model_database.ridgec,
                 'lr_elasticnet' :   model_database.lr_elasticnet,
                 'svc'           :   model_database.svc,
-                'gbc'           :   model_database.gbc,
+#                'gbc'           :   model_database.gbc,
 #                'lightgbmc'     :   model_database.lightgbmc,
-                'xgboostc'      :   model_database.xgboostc,
-                'LogReg'        :   model_database.LogisticRegression,
-                'knn'           :   model_database.KNeighborsClassifier,
-                'SVC2'          :   model_database.SVC2,
-                'decissionTree' :   model_database.DecisionTreeClassifier,
-                'adaboost'      :   model_database.AdaBoostClassifier,
-                'GradientBoost' :   model_database.GradientBoostingClassifier,
-                'GaussianNB'    :   model_database.GaussianNB,
-                'RabdomForest'  :   model_database.RandomForestClassifier,
-                'ExtraTree'     :   model_database.ExtraTreesClassifier
+#                'xgboostc'      :   model_database.xgboostc,
+#                'LogReg'        :   model_database.LogisticRegression,
+#                'knn'           :   model_database.KNeighborsClassifier,
+#                'SVC2'          :   model_database.SVC2,
+#                'decissionTree' :   model_database.DecisionTreeClassifier,
+#                'adaboost'      :   model_database.AdaBoostClassifier,
+#                'GradientBoost' :   model_database.GradientBoostingClassifier,
+#                'GaussianNB'    :   model_database.GaussianNB,
+#                'RabdomForest'  :   model_database.RandomForestClassifier,
+#                'ExtraTree'     :   model_database.ExtraTreesClassifier
 
             }
 
