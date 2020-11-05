@@ -67,8 +67,8 @@ def accuracy_calculator(model_name, y_pred, Y_true):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # root mean square error function
-def rmse(Y_actual, y_pred):
-    return np.sqrt(mean_squared_error(Y_actual, y_pred))
+def rmse(y_train, y_pred):
+    return np.sqrt(mean_squared_error(y_train, y_pred))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # model scoring function
@@ -190,9 +190,7 @@ result_file['Outcome'] = result_file['Outcome'].apply(lambda x: x if x < q2 else
 print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 result_file['Outcome'], c_acc = accuracy_calculator('Combine', result_file['Outcome'], y_test)
-
-rmse = rmse(y_test, result_file['Outcome'])
-print('\nrmse score on test data  :~>  ', rmse)
+#print("\nAccuracy score: %.8f" % (y_test == result_file['Outcome']).mean())
 print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 #print(pp)
