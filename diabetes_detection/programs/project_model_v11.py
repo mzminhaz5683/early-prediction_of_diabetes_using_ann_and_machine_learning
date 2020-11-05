@@ -15,12 +15,17 @@ pd.set_option('display.float_format', lambda x: '{:.4f}'.format(x))
 ####################################################################################################
 output_path = './output/predicted_results/'
 project = ''
+random_split = 1
 if controler.project_version == 3:
         from programs import project_v3_actual_split as project_analyser
         project = 'project_v3_actual_split'
+        random_split = 0
 elif controler.project_version == 4:
         from programs import project_v4_random_split as project_analyser
         project = 'project_v4_random_split'
+elif controler.project_version == 5:
+        from programs import project_v5_random_split as project_analyser
+        project = 'project_v5_random_split'
 else:
     print("\n\n\n Can't find any process model \n\n\n")
     exit(0)
@@ -86,13 +91,13 @@ model_dicty = {'ridgec'         :   model_database.ridgec,
                 'gbc'           :   model_database.gbc,
 #                'lightgbmc'     :   model_database.lightgbmc,
                 'xgboostc'      :   model_database.xgboostc,
-#                'LogReg'        :   model_database.LogisticRegression,
-#                'knn'           :   model_database.KNeighborsClassifier,
-#                'SVC2'          :   model_database.SVC2,
+                'LogReg'        :   model_database.LogisticRegression,
+                'knn'           :   model_database.KNeighborsClassifier,
+                'SVC2'          :   model_database.SVC2,
                 'decissionTree' :   model_database.DecisionTreeClassifier,
                 'adaboost'      :   model_database.AdaBoostClassifier,
-#                'GradientBoost' :   model_database.GradientBoostingClassifier,
-#                'GaussianNB'    :   model_database.GaussianNB,
+                'GradientBoost' :   model_database.GradientBoostingClassifier,
+                'GaussianNB'    :   model_database.GaussianNB,
                 'RabdomForest'  :   model_database.RandomForestClassifier,
                 'ExtraTree'     :   model_database.ExtraTreesClassifier
 
@@ -103,17 +108,10 @@ model_dicty = {'ridgec'         :   model_database.ridgec,
 #                                   save high accuracy dataset
 ####################################################################################################
 def save_80_acc(acc, name):
-    if acc > 80:
-        #train = pd.DataFrame(X_train_ID, X_train, y_train)
-        #test = pd.DataFrame(X_test_ID, X_test)
-        #actual_result = pd.DataFrame(X_test_ID, y_test)
-        train = pd.concat([X_train_ID, X_train, y_train], sort=False, axis=1)
-        test = pd.concat([X_test_ID, X_test], sort=False, axis=1)
-        actual_result = pd.concat([X_test_ID, y_test], sort=False, axis=1)
-
+    if acc > 80 and random_split:
         import os
         path = "output/set_of_+80_acc/{0:.2f}_for_{1}".format(acc, name)
-        sava_path = "./output/set_of_+80_acc/{0:.2f}_for_{1}/".format(acc, name)
+        save_path = "./output/set_of_+80_acc/{0:.2f}_for_{1}/".format(acc, name)
         try:
             os.mkdir(path)
             print('Path created')
@@ -121,9 +119,7 @@ def save_80_acc(acc, name):
             print('Can not create path')
             pass
 
-        train.to_csv(sava_path + 'train.csv')
-        test.to_csv(sava_path + 'test.csv')
-        actual_result.to_csv(sava_path + 'actual_result.csv')
+        project_analyser.save_random_split(save_path)
 
         print('Data recorded in : {0}'.format(path))
         print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
@@ -152,9 +148,9 @@ def blend_models_predict(X, Y, test=0):
     m_predict = []
     for name, m_fit in m_fit_dicty.items():
         predict = m_fit.predict(X)
-        _, acc = accuracy_calculator(name, predict, Y)
         m_predict.append(predict)
         if test:
+            _, acc = accuracy_calculator(name, predict, Y)
             save_80_acc(acc, name)
 
     combine = 0

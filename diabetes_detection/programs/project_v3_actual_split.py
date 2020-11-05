@@ -227,14 +227,8 @@ if controler.log_normalization_on_target  or controler.all:
 ####################################################################################################
 #                                   all_data spliting
 ####################################################################################################
-df_train = all_data.iloc[:len(y_train), :]
-df_test = all_data.iloc[len(df_train):, :]
-df_train['Outcome'] = y_train
-
-##############################~~~~~~de-couple all_data~~~~~#########################################
-y_train = df_train.Outcome.reset_index(drop=True)
-final_train = df_train.drop(['Outcome'], axis = 1)
-final_test = df_test
+final_train = all_data.iloc[:len(y_train), :]
+final_test = all_data.iloc[len(df_train):, :]
 
 ##############################~~~~~~over fit handinig~~~~~##########################################
 #overfit = ['Pregnancies']
@@ -305,8 +299,8 @@ def get_IDs():
     return test_ID, train_ID
 
 def get_train_test_data():
-    print('\n------------------------------\nX_train dtypes :\n------------------------------\n{0}'.format(final_train.dtypes))
-    print('\n------------------------------\n X_test dtypes :\n------------------------------\n{0}'.format(final_test.dtypes))
+    #print('\n------------------------------\nX_train dtypes :\n------------------------------\n{0}'.format(final_train.dtypes))
+    #print('\n------------------------------\n X_test dtypes :\n------------------------------\n{0}'.format(final_test.dtypes))
     print('\n------------------------------\nX_train, X_test: ', final_train.shape, final_test.shape)
     return final_train, final_test
 

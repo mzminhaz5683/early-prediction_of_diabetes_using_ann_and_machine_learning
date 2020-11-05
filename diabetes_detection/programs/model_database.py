@@ -30,9 +30,6 @@ kfolds = KFold(n_splits=10, shuffle=True, random_state=controler.rndm_state)
 
 # setup models
 alphas_alt = [14.5, 14.6, 14.7, 14.8, 14.9, 15, 15.1, 15.2, 15.3, 15.4, 15.5]
-alphas2 = [5e-05, 0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.0006, 0.0007, 0.0008]
-e_alphas = [0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.0006, 0.0007]
-e_l1ratio = [0.8, 0.85, 0.9, 0.95, 0.99, 1]
 
 
 ridgec = make_pipeline(RobustScaler(), RidgeClassifierCV(alphas=alphas_alt, cv=kfolds))
@@ -42,20 +39,20 @@ lr_elasticnet = make_pipeline(RobustScaler(), LogisticRegression(penalty = 'elas
                                                 solver = 'saga',
                                                 max_iter=1e7,
                                                 l1_ratio=0.05, # 0.04
-                                                random_state=controler.rndm_state)) #alphas=e_alphas
+                                                random_state=controler.rndm_state))
 
 
 svc = make_pipeline(RobustScaler(), SVC(C=20,
-                                        gamma=0.0005, # 0.0003
+                                        gamma=0.0003, # 0.0003
                                         random_state=controler.rndm_state))
 
 
 gbc = GradientBoostingClassifier(learning_rate=0.01, #0.05
                                 max_depth=4,
                                 max_features='sqrt',
-                                min_samples_leaf=20, # 15
-                                min_samples_split=15, # 10
-                                loss='exponential', # Adaboost
+                                min_samples_leaf=13, # 15
+                                min_samples_split=10, # 10
+                                loss='exponential', # Adaboost, exponential
                                 random_state=controler.rndm_state,
                                 n_estimators=controler.n_estimators)
 
@@ -64,9 +61,9 @@ lightgbmc = LGBMClassifier(objective='binary',
                             num_leaves=4,
                             learning_rate=0.01, # 0.01
                             max_bin=200,
-                            bagging_fraction=0.50, # 0.75
-                            bagging_freq=4, # 5
-                            bagging_seed=6, # 7
+                            bagging_fraction=0.75, # 0.75
+                            bagging_freq=5, # 5
+                            bagging_seed=7, # 7
                             feature_fraction=0.2,
                             feature_fraction_seed=7,
                             verbose=-1,
@@ -76,13 +73,13 @@ lightgbmc = LGBMClassifier(objective='binary',
 xgboostc = XGBClassifier(learning_rate=0.01, # 0.01
                         max_depth=3,
                         min_child_weight=0,
-                        gamma=0.0003, # 0
+                        gamma=0.0000, # 0
                         subsample=0.7,
                         colsample_bytree=0.7,
                         nthread=-1,
                         scale_pos_weight=1,
-                        seed=15, # 27
-                        reg_alpha= 0.0001, # 0.00006,
+                        seed=27, # 27
+                        reg_alpha= 0.0005, # 0.00006,
                         random_state=controler.rndm_state,
                         n_estimators=controler.n_estimators + 460)
 
@@ -98,11 +95,12 @@ param3 = {'C': 1.7, 'kernel': 'rbf', 'random_state':  controler.rndm_state, 'pro
 SVC2 = SVC(**param3)
 
 #param = {'criterion': 'gini', 'max_depth': 3, 'max_features': 2, 'min_samples_leaf': 3}
-param4 = {'criterion': 'gini', 'max_depth': 3, 'random_state': controler.rndm_state}
+param4 = {'criterion': 'gini', 'max_depth': 3, 'max_features': 2, 'min_samples_leaf': 3,
+                                                'random_state': controler.rndm_state}
 dt = DecisionTreeClassifier = DecisionTreeClassifier(**param4)
 
 #param5 = {'learning_rate': 0.05, 'n_estimators': 150}
-param5 = {'learning_rate': 0.01, 'n_estimators': 150}
+param5 = {'learning_rate': 0.04, 'n_estimators': 150}
 adab = AdaBoostClassifier = AdaBoostClassifier(**param5)
 
 param6 = {'learning_rate': 0.01, 'n_estimators': 100}

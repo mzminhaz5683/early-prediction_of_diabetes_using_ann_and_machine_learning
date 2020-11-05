@@ -18,8 +18,10 @@ clear
 
 
 ##################################################################################################
-for ((a=01; a <= 20 ; a++))
+for ((a=01; a <= 100 ; a++))
 do
 python3 -m programs.project_model_v11
 read -t 20 -p "wait for 20 seconds only ..."
 done
+
+echo 'Finish run.sh\n'

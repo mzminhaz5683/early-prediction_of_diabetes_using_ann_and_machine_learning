@@ -290,6 +290,19 @@ X_train = final_train.drop(['Id'], axis = 1)
 test_ID = final_test.Id.reset_index(drop=True)
 X_test = final_test.drop(['Id'], axis = 1)
 
+if 1:
+    final_train_save = pd.concat([pd.DataFrame(), final_train])
+    final_test_save = pd.concat([pd.DataFrame(), final_test])
+    y_train_save = pd.concat([pd.DataFrame(), y_train])
+    y_test_save = pd.concat([pd.DataFrame(), y_test])
+
+    final_train_save['Outcome'] = y_train_save
+    y_test_save['Id'] = final_test_save['Id']
+
+    final_train_save.to_csv(path+'final_train_save.csv')
+    final_test_save.to_csv(path+'final_test_save.csv')
+    y_test_save.to_csv(path+'y_test_save.csv')
+    print('\n\nsave final')
 
 def get_train_label():
     print("\n------------------------------\ny_train shape:", y_train.shape)
@@ -301,8 +314,8 @@ def get_IDs():
 
 def get_train_test_data():
     print('\n------------------------------\nX_train dtypes :\n------------------------------\n{0}'.format(X_train.dtypes))
-    print('\n------------------------------\n X_test dtypes :\n------------------------------\n{0}'.format(X_test.dtypes))
-    print('\n------------------------------\nX_train, X_test: ', X_train.shape, X_test.shape)
+    #print('\n------------------------------\n X_test dtypes :\n------------------------------\n{0}'.format(X_test.dtypes))
+    #print('\n------------------------------\nX_train, X_test: ', X_train.shape, X_test.shape)
     return X_train, X_test
 
 def get_actual_result():
