@@ -6,9 +6,20 @@ clear
 
 #python3 -m programs.project_model_v4
 #python3 -m programs.project_model_v8
-python3 -m programs.project_model_v9
+#python3 -m programs.project_model_v9
+#python3 -m programs.project_model_v10
 
-#kill -9 PID
+#python3 -m test
+#kill -9 PIDs
 
-read -t 120 -p "wait for 120 seconds only ..."
+#python3 -m programs.project_model_v11
 
+
+
+
+##################################################################################################
+for ((a=01; a <= 20 ; a++))
+do
+python3 -m programs.project_model_v11
+read -t 20 -p "wait for 20 seconds only ..."
+done

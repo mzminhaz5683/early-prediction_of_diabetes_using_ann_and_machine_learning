@@ -297,22 +297,17 @@ print('\n')
 #                                   functions of modeling
 ####################################################################################################
 def get_train_label():
-    print("y_train of get_train_label():", y_train.shape)
+    print("\n------------------------------\ny_train shape:", y_train.shape)
     return y_train
 
-def get_test_ID():
-    print("df_test_ID of get_test_ID():", test_ID.shape)
-    return test_ID
+def get_IDs():
+    print("\n------------------------------\ntest_ID, train_ID shape :", test_ID.shape, train_ID.shape)
+    return test_ID, train_ID
 
 def get_train_test_data():
-    print('Shape of get_train_test_data(): ', final_train.shape, y_train.shape, final_test.shape)
+    print('\n------------------------------\nX_train dtypes :\n------------------------------\n{0}'.format(final_train.dtypes))
+    print('\n------------------------------\n X_test dtypes :\n------------------------------\n{0}'.format(final_test.dtypes))
+    print('\n------------------------------\nX_train, X_test: ', final_train.shape, final_test.shape)
     return final_train, final_test
 
-def project_description(description):
-    if controler.file_description:
-        description += '~~~~~~~~~~~~~~~~~~~~~~~ Project file data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n'
-        file = open(path+'model_description.txt', 'w')
-        file.write(description)
-        print('__________________________________________________________________________________________')
-        print('\nmodel_description has been saved at : '+path+'model_description.txt')
-        file.close()
+    

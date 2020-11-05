@@ -26,8 +26,9 @@ individual_normalization_show = 0 #0/1
 ####################################################################################################
 #                                   model controller
 ####################################################################################################
-rndm_state = 10         # 0 best: 10
+rndm_state = 15         # 0 best: 10
 n_estimators = 15       # 10 best: 15
 criterion = 'gini'      # entropy , gini best: gini
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-project_version = 3
+project_version = 4
+resut_file_name = 'model'

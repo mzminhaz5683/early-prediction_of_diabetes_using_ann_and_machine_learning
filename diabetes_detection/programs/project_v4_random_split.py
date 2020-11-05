@@ -282,23 +282,29 @@ print('\n')
 from sklearn.model_selection import train_test_split
 # Split dataset into training set and test set
 final_train, final_test, y_train, y_test = train_test_split(all_data, Y_dataset, test_size=0.2) # 80% training and 20% test
+#test_ID = final_test['Id']
+#train_ID = final_train['Id']
+train_ID = final_train.Id.reset_index(drop=True)
+X_train = final_train.drop(['Id'], axis = 1)
+
+test_ID = final_test.Id.reset_index(drop=True)
+X_test = final_test.drop(['Id'], axis = 1)
+
 
 def get_train_label():
-    print("y_train of get_train_label():", y_train.shape)
+    print("\n------------------------------\ny_train shape:", y_train.shape)
     return y_train
 
+def get_IDs():
+    print("\n------------------------------\ntest_ID, train_ID shape :", test_ID.shape, train_ID.shape)
+    return test_ID, train_ID
+
 def get_train_test_data():
-    print('Shape of get_train_test_data(): ', final_train.shape, y_train.shape, final_test.shape)
-    return final_train, final_test
+    print('\n------------------------------\nX_train dtypes :\n------------------------------\n{0}'.format(X_train.dtypes))
+    print('\n------------------------------\n X_test dtypes :\n------------------------------\n{0}'.format(X_test.dtypes))
+    print('\n------------------------------\nX_train, X_test: ', X_train.shape, X_test.shape)
+    return X_train, X_test
 
 def get_actual_result():
+    print("\n------------------------------\ny_test shape:", y_test.shape)
     return y_test
-
-def project_description(description):
-    if controler.file_description:
-        description += '~~~~~~~~~~~~~~~~~~~~~~~ Project file data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n'
-        file = open(path+'model_description.txt', 'w')
-        file.write(description)
-        print('__________________________________________________________________________________________')
-        print('\nmodel_description has been saved at : '+path+'model_description.txt')
-        file.close()

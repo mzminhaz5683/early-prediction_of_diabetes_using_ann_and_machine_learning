@@ -37,21 +37,46 @@ X_train, X_test = project_analyser.get_train_test_data()
 y_train = project_analyser.get_train_label()
 
 
+####################################################################################################
+#                                   accuracy function
+####################################################################################################
+#Forming a confusion matrix to check our accuracy
+def accuracy_calculator(model_name, y_pred, Y_true):
+    pp = []
+    for p in y_pred:
+        if p>0.5:
+            pp.append(1)
+        else:
+            pp.append(0)
+
+    y_pred_f = pp
+    cm=confusion_matrix(Y_true,y_pred_f)
+    acc = (cm[0][0]+cm[1][1])/(cm[0][0]+cm[0][1]+cm[1][0]+cm[1][1])*100
+    print('{0} model accuracy : {1:.2f} %'.format(model_name, acc))
+    print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    return y_pred_f, acc
+####################################################################################################
+#                                   Model Start : 1
+####################################################################################################
+from sklearn.ensemble import VotingClassifier
+from mlens.ensemble import SuperLearner
+from sklearn.neighbors import KNeighborsClassifier
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import AdaBoostClassifier
+
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import ExtraTreesClassifier
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+from sklearn.linear_model import RidgeClassifierCV
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.ensemble import GradientBoostingClassifier
+from lightgbm import LGBMClassifier
+from xgboost.sklearn import XGBClassifier
+from mlxtend.classifier import StackingCVClassifier
 if 0:
-    ####################################################################################################
-    #                                   Model Start : 2
-    ####################################################################################################
-    from sklearn.ensemble import VotingClassifier
-    from mlens.ensemble import SuperLearner
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.neighbors import KNeighborsClassifier
-    from sklearn.svm import SVC
-    from sklearn.tree import DecisionTreeClassifier
-    from sklearn.ensemble import AdaBoostClassifier
-    from sklearn.ensemble import GradientBoostingClassifier
-    from sklearn.naive_bayes import GaussianNB
-    from sklearn.ensemble import RandomForestClassifier
-    from sklearn.ensemble import ExtraTreesClassifier
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def get_models(lr, knn, svm, dt, ab, gb, g_nb, rf, et):
         """Generate a library of base learners."""
@@ -186,15 +211,8 @@ else:
     from sklearn.preprocessing import RobustScaler
     from sklearn.model_selection import KFold, cross_val_score
     from sklearn.metrics import mean_squared_error
-    from sklearn.linear_model import ElasticNetCV, LassoCV, RidgeCV
     from sklearn.pipeline import make_pipeline
 
-    from sklearn.ensemble import GradientBoostingRegressor
-    from sklearn.svm import SVR
-    from mlxtend.regressor import StackingCVRegressor
-
-    from xgboost import XGBRegressor
-    from lightgbm import LGBMRegressor
     
     kfolds = KFold(n_splits=10, shuffle=True, random_state=controler.rndm_state)
     # rmse
@@ -202,7 +220,7 @@ else:
         return np.sqrt(mean_squared_error(y_train, y_pred))
     
     # build our model scoring function
-    def cv_rmse(model, X_train=X_train):
+    def cv_rmse(model):
         rmse = np.sqrt(-cross_val_score(model, X_train, y_train,
                                             scoring="neg_mean_squared_error",
                                             cv=kfolds))
@@ -214,34 +232,34 @@ else:
     e_alphas = [0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.0006, 0.0007]
     e_l1ratio = [0.8, 0.85, 0.9, 0.95, 0.99, 1]
 
-    ridge = make_pipeline(RobustScaler(), RidgeCV(alphas=alphas_alt,
+
+    ridgec = make_pipeline(RobustScaler(), RidgeClassifierCV(alphas=alphas_alt,
                                                     cv=kfolds))
 
-    lasso = make_pipeline(RobustScaler(), LassoCV(max_iter=1e7,
-                                                    alphas=alphas2,
-                                                    random_state=controler.rndm_state,
-                                                    cv=kfolds))
 
-    elasticnet = make_pipeline(RobustScaler(), ElasticNetCV(max_iter=1e7,
-                                                    alphas=e_alphas,
-                                                    cv=kfolds,
-                                                    l1_ratio=e_l1ratio,
-                                                    random_state=controler.rndm_state,))
+    lr_elasticnet = make_pipeline(RobustScaler(), LogisticRegression(penalty = 'elasticnet',
+                                                    solver = 'saga',
+                                                    max_iter=1e7,
+                                                    l1_ratio=0.04,
+                                                    random_state=controler.rndm_state)) #alphas=e_alphas
 
-    svr = make_pipeline(RobustScaler(), SVR(C=20,
-                                            epsilon=0.008,
-                                            gamma=0.0003))
 
-    gbr = GradientBoostingRegressor(learning_rate=0.05,
+    svc = make_pipeline(RobustScaler(), SVC(C=20,
+                                            gamma=0.0003,
+                                            random_state=controler.rndm_state))
+
+
+    gbc = GradientBoostingClassifier(learning_rate=0.05,
                                     max_depth=4,
                                     max_features='sqrt',
                                     min_samples_leaf=15,
                                     min_samples_split=10,
-                                    loss='huber',
+                                    loss='exponential', # Adaboost
                                     random_state=controler.rndm_state,
                                     n_estimators=controler.n_estimators)
-    
-    lightgbm = LGBMRegressor(objective='regression',
+
+
+    lightgbmc = LGBMClassifier(objective='binary',
                                 num_leaves=4,
                                 learning_rate=0.01,
                                 max_bin=200,
@@ -253,13 +271,13 @@ else:
                                 verbose=-1,
                                 n_estimators=controler.n_estimators + 2000)
 
-    xgboost = XGBRegressor(learning_rate=0.01,
+    
+    xgboostc = XGBClassifier(learning_rate=0.01,
                             max_depth=3,
                             min_child_weight=0,
                             gamma=0,
                             subsample=0.7,
                             colsample_bytree=0.7,
-                            objective='reg:linear',
                             nthread=-1,
                             scale_pos_weight=1,
                             seed=27,
@@ -267,78 +285,97 @@ else:
                             random_state=controler.rndm_state,
                             n_estimators=controler.n_estimators + 460)
     
-    stack_gen = StackingCVRegressor(regressors=(ridge, lasso, elasticnet, svr, gbr, xgboost, lightgbm),
-                                    meta_regressor=xgboost,
+
+    # ridgec, lr_elasticnet, svc, gbc, lightgbmc, xgboostc
+    stack_gen = StackingCVClassifier(classifiers=(ridgec, lr_elasticnet, svc, gbc, lightgbmc, xgboostc),
+                                    meta_classifier=xgboostc,
                                     use_features_in_secondary=True)
     
     #~~~~~~~~~~~~~~~~~~~ Modeling ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    print('\n\n~~~~~~~~~~~~~~~~~TEST score on CV~~~~~~~~~~~~~~~~~')
+    print('\n\n~~~~~~~~~~~~~~~~~TEST score on Cross Validation~~~~~~~~~~~~~~~~~')
 
-    score = cv_rmse(ridge)
+    score = cv_rmse(ridgec)
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print("Kernel Ridge score: mean:{:.4f},  std:{:.4f}\n".format(score.mean(), score.std()) )
+    print("Kernel Ridge Classifier score: mean:{:.4f},  std:{:.4f}\n".format(score.mean(), score.std()) )
 
-    score = cv_rmse(lasso)
+    score = cv_rmse(lr_elasticnet)
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print("Lasso score: mean:{:.4f},  std:{:.4f}\n".format(score.mean(), score.std()) )
+    print("Logistic Regression: ElasticNet score: mean:{:.4f},  std:{:.4f}\n".format(score.mean(), score.std()) )
 
-    score = cv_rmse(elasticnet)
+    score = cv_rmse(svc)
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print("ElasticNet score: mean:{:.4f},  std:{:.4f}\n".format(score.mean(), score.std()) )
+    print("Support Vector Classifier score: mean:{:.4f},  std:{:.4f}\n".format(score.mean(), score.std()) )
 
-    score = cv_rmse(svr)
+    score = cv_rmse(gbc)
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print("SVR score: mean:{:.4f},  std:{:.4f}\n".format(score.mean(), score.std()) )
+    print("Gradient Boosting Classifier score: mean:{:.4f},  std:{:.4f}\n".format(score.mean(), score.std()) )
 
-    score = cv_rmse(lightgbm)
+    score = cv_rmse(lightgbmc)
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print("Lightgbm score: mean:{:.4f},  std:{:.4f}\n".format(score.mean(), score.std()) )
+    print("lightgbm Classifier score: mean:{:.4f},  std:{:.4f}\n".format(score.mean(), score.std()) )
 
-    score = cv_rmse(gbr)
+    score = cv_rmse(xgboostc)
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print("GradientBoosting score: mean:{:.4f},  std:{:.4f}\n".format(score.mean(), score.std()) )
+    print("XGBoost Classifier score: mean:{:.4f},  std:{:.4f}\n".format(score.mean(), score.std()) )
 
-    score = cv_rmse(xgboost)
+    
+    # ridgec, lr_elasticnet, svc, gbc, lightgbmc, xgboostc
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print("Xgboost score: mean:{:.4f},  std:{:.4f}\n".format(score.mean(), score.std()) )
-
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('Start : StackingCVRegressor')
+    print('Start : StackingCV Classifier')
     stack_gen_model = stack_gen.fit(np.array(X_train), np.array(y_train))
-    print('Start : elasticnet')
-    elastic_model_full_data = elasticnet.fit(X_train, y_train)
-    print('Start : lasso')
-    lasso_model_full_data = lasso.fit(X_train, y_train)
-    print('Start : ridge')
-    ridge_model_full_data = ridge.fit(X_train, y_train)
-    print('Start : svr')
-    svr_model_full_data = svr.fit(X_train, y_train)
-    print('Start : GradientBoosting')
-    gbr_model_full_data = gbr.fit(X_train, y_train)
-    print('Start : xgboost')
-    xgb_model_full_data = xgboost.fit(X_train, y_train)
-    print('Start : lightgbm')
-    lgb_model_full_data = lightgbm.fit(X_train, y_train)
+    
+    print('Start : ridgec')
+    ridgec_model_full_data = ridgec.fit(X_train, y_train)
+    
+    print('Start : lr_elasticnet')
+    lr_elasticnet_model_full_data = lr_elasticnet.fit(X_train, y_train)
+    
+    print('Start : svc')
+    svc_model_full_data = svc.fit(X_train, y_train)
+    
+    print('Start : GradientBoostingClassifier')
+    gbc_model_full_data = gbc.fit(X_train, y_train)
+    
+    print('Start : lightgbmc')
+    lightgbmc_model_full_data = lightgbmc.fit(X_train, y_train)
+    
+    print('Start : xgboostc')
+    xgboostc_model_full_data = xgboostc.fit(X_train, y_train)
 
-    def blend_models_predict(X):
-        return ((0.1 * elastic_model_full_data.predict(X)) +
-                (0.05 * lasso_model_full_data.predict(X)) +
-                (0.1 * ridge_model_full_data.predict(X)) +
-                (0.1 * svr_model_full_data.predict(X)) +
-                (0.1 * gbr_model_full_data.predict(X)) +
-                (0.15 * xgb_model_full_data.predict(X)) +
-                (0.1 * lgb_model_full_data.predict(X)) +
-                (0.3 * stack_gen_model.predict(np.array(X))))
+    # ridgec, lr_elasticnet, svc, gbc, lightgbmc, xgboostc
+    def blend_models_predict(X, Y):
+        rd_p    = ridgec_model_full_data.predict(X)
+        accuracy_calculator('ridgec', rd_p, Y)
+        lr_p    = lr_elasticnet_model_full_data.predict(X)
+        accuracy_calculator('lr_elasticnet', lr_p, Y)
+        svc_p   = svc_model_full_data.predict(X)
+        accuracy_calculator('svc', svc_p, Y)
+        gdc_p   = gbc_model_full_data.predict(X)
+        accuracy_calculator('gbc', gdc_p, Y)
+        lgbmc_p = lightgbmc_model_full_data.predict(X)
+        accuracy_calculator('lightgbmc', lgbmc_p, Y)
+        xgbc_p  = xgboostc_model_full_data.predict(X)
+        accuracy_calculator('xgboostc', xgbc_p, Y)
+        sg_p    = stack_gen_model.predict(np.array(X))
+        accuracy_calculator('stack_gen', sg_p, Y)
 
-    print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-    rmse = rmse(y_train, blend_models_predict(X_train))
-    print('rmse score on train data  :~>  ', rmse)
+        w = [0.1, 0.1, 0.15, 0.1, 0.1, 0.15, 0.3]
+        return ((rd_p*w[0])+(lr_p*w[1])+(svc_p*w[2])+(gdc_p*w[3])+(lgbmc_p*w[4])+(xgbc_p*w[5])
+                +(sg_p*w[6]))
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    print('\n~~~~~~~~~~~~~~~~~~~~~~For, train data~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    rmse = rmse(y_train, blend_models_predict(X_train, y_train))
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('\nrmse score on train data  :~>  ', rmse)
 
     #y_pred = np.floor(np.expm1(blend_models_predict(X_test)))
-    y_pred = blend_models_predict(X_test)
+    print('\n\n~~~~~~~~~~~~~~~~~~~~~~For, Test data~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    y_pred = blend_models_predict(X_test, y_test)
     y_pred_data = pd.DataFrame({'Outcome':y_pred})
-    print(y_pred_data)
+    #print(y_pred_data)
 
     ######################################## Brutal approach ##########################################
     # Brutal approach to deal with predictions close to outer range 
@@ -349,30 +386,13 @@ else:
     y_pred_data['Outcome'] = y_pred_data['Outcome'].apply(lambda x: x if x < q2 else x*1.1)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #print('y_pred : ', y_pred[0:10])
-
-    pp = []
-    for p in y_pred_data['Outcome']:
-        if p>0.5:
-            pp.append(1)
-        else:
-            pp.append(0)
-
-    y_pred_data['Outcome'] = pp
+    print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    y_pred_data['Outcome'], c_acc = accuracy_calculator('Combine', y_pred_data['Outcome'], y_test)
     print("\nAccuracy score: %.8f" % (y_test == y_pred_data['Outcome']).mean())
+    print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
     #print(pp)
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #Forming a confusion matrix to check our accuracy
-    def accuracy_calculator(y_pred):
-            cm=confusion_matrix(y_test,y_pred)
-            acc = (cm[0][0]+cm[1][1])/(cm[0][0]+cm[0][1]+cm[1][0]+cm[1][1])*100
-            return acc
-    c_acc = accuracy_calculator(y_pred_data['Outcome'])
-    print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-    print('Combine model accuracy : {0:.2f} %'.format(c_acc))
-    print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 ####################################################################################################
 #                                   save result
 ####################################################################################################
