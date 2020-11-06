@@ -35,13 +35,13 @@ test.drop(['Id'], axis=1, inplace=True) # droping 'Id' from test
 train.drop(['Id'], axis = 1, inplace=True) # droping 'Id', 'Outcome' from train
 
 raw_dataset = pd.concat([train, test]).reset_index(drop=True) # concatenation
-print('raw_dataset : \n{0}'.format(raw_dataset.dtypes))
+print(' ~~~~~~~~~~ raw_dataset : ~~~~~~~~~~ \n{0}'.format(raw_dataset.dtypes))
 ####################################################################################################
 #                                   data checking
 ####################################################################################################
 # hit_map : 1
 if 0<(controler.hit_map -1+1) or controler.all:
-    checker_v2.hitmap(train, 'Outcome', 'raw_dataset_Prime')
+    checker_v2.hitmap(train, 'Outcome', 'train_with_outcome_prime')
     #checker_v2.hitmap(train, 'Outcome')
 
 # hist_plot : 1
@@ -76,19 +76,22 @@ train.drop(['Outcome'], axis = 1, inplace=True) # droping 'Id', 'Outcome' from t
 
 
 all_data = pd.concat([train, test]).reset_index(drop=True) # concatenation
-print('\n\nall_data : \n{0}'.format(all_data.dtypes))
+print('\n ~~~~~~~~~~ all_data : ~~~~~~~~~~ \n{0}'.format(all_data.dtypes))
 ####################################################################################################
 #                                   shaving all_data as prime
 ####################################################################################################
+print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 if controler.save_all_data  or controler.all:
     all_data.to_csv(path+'all_data prime.csv')
-    print('\nAll prime data has been saved at : '+path+'all_data prime.csv\n')
+    print('\nAll prime data has been saved at : '+path+'all_data prime.csv')
 
-print('__________________________________________________________________________________________')
 print('\nprime :: all_data shape (Rows, Columns) & Columns-(without :: Id, Outcome, classes): ', all_data.shape)
 ####################################################################################################
 #                                   data operation - Multi level missing data handling
 ####################################################################################################
+# single level data handling
+all_data.loc[189, 'SkinThickness'] = 63
+
 if controler.multi_level_Data_Handling  or controler.all:
     ###############~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##########################################
     #                               multi-level data handle function    
@@ -171,61 +174,47 @@ else:
 # skew_plot : 2
 if 0<(controler.skew_plot -2+1)  or controler.all:
     for clmn in all_data:
-        checker_v2.skew_plot(all_data[clmn], 'Before tranformation')
+        checker_v2.skew_plot(all_data[clmn], 'all_data Before tranformation')
 
 # scatter_plot : 1
 if 0<(controler.scatter_plot -3+1) or controler.all:
     for i in numerics_outliars:
-        checker_v2.scatter_plot(train, i, 'Before tranformation : '+i)
+        checker_v2.scatter_plot(train, i, 'all_data Before tranformation : '+i)
 
 # missing data checking : 2
 if 0<(controler.missing_data -2+1)  or controler.all:
     checker_v2.missing_data(all_data, controler.save_column_name + 1)
 ####################################################################################################
+#                                   shaving all_data final
+####################################################################################################
+print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+if controler.save_all_data  or controler.all:
+    all_data.to_csv(path+'all_data before_transformation actual_split.csv')
+    print('\nAll prime 2 data has been saved at : '+path+'all_data before_transformation actual_split.csv')
+
+print('\nPrime 2 :: all_data shape (Rows, Columns) & Columns-(without :: Id only): ', all_data.shape)
+####################################################################################################
 #                                   data operation - transformation
 ####################################################################################################
 #data skewness
-print("\n __________ prime skewness __________ ")
+print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+print("\n ~~~~~~~~~~ prime skewness ~~~~~~~~~~ ")
 print(all_data.skew())
-print(" __________ ______________ __________ \n")
+print(" ~~~~~~~~~~ ~~~~~~~~~~~~~~ ~~~~~~~~~~ \n")
 
-def normalizer(trnsfrm, id):
-    if id:
-        for clmn in trnsfrm:
-            all_data[clmn] = np.log1p(all_data[clmn])
-    else:
-        for clmn in trnsfrm:
-            all_data[clmn] = np.sqrt(all_data[clmn])
 
 if controler.log_normalization_on_target  or controler.all:
-    trnsfrm_1 = ['Glucose', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction',
-                 'Age', 'AgeClass', 'BPClass']
-    normalizer(trnsfrm_1, 1)
-
-    if controler.individual_normalization_show:
-        print("\n __________ trnsfrm_1 __________ ")
-        print(all_data.skew())
-        print(" __________ ______________ __________ \n")
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # SkinThickness : chipest skewed
-    trnsfrm_2 = ['Insulin', 'DiabetesPedigreeFunction',
-                 'Age', 'AgeClass']
-    normalizer(trnsfrm_2, 1)
-
-    if controler.individual_normalization_show:
-        print("\n __________ trnsfrm_2 __________ ")
-        print(all_data.skew())
-        print(" __________ ______________ __________ \n")
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    trnsfrm_3 = ['Insulin', 'DiabetesPedigreeFunction', 'Age']
-    normalizer(trnsfrm_3, 0)
     
-    if controler.individual_normalization_show:
-        print("\n __________ trnsfrm_3 __________ ")
-        print(all_data.skew())
-        print(" __________ ______________ __________ \n")
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Insulin, Age : furthermore transformation gives no significient change
+    all_data['Glucose']                 = np.log1p(all_data['Glucose'])
+    all_data['SkinThickness']           = np.sqrt(all_data['SkinThickness'])
+    all_data['Insulin']                 = np.log10(np.log10(np.log10(all_data['Insulin'])))
+    all_data['BMI']                     = np.log1p(all_data['BMI'])
+    all_data['DiabetesPedigreeFunction']= np.log10(all_data['DiabetesPedigreeFunction'])
+    all_data['Age']                     = np.log10(np.log10(np.log10(all_data['Age'])))
+    all_data['AgeClass']                = np.log2(all_data['AgeClass'])
+    all_data['BPClass']                 = np.sqrt(all_data['BPClass'])
+
+    # BMIClass, GlucoClass : are in chipest skew
 
 ####################################################################################################
 #                                   all_data spliting
@@ -234,6 +223,7 @@ final_train = all_data.iloc[:len(train), :]
 final_test = all_data.iloc[len(train):, :]
 
 ##############################~~~~~~over fit handinig~~~~~##########################################
+print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 #overfit = ['Pregnancies']
 overfit = []
 for i in final_train.columns:
@@ -251,10 +241,10 @@ print('\nfinal shape (df_train, y_train, df_test): ',final_train.shape,y_train.s
 #                                   data checking for 3rd time
 ####################################################################################################
 # final data skewness
-print("\n __________ final skewness __________ ")
+print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+print("\n ~~~~~~~~~~ final skewness ~~~~~~~~~~ ")
 print(all_data.skew())
-print(" __________ ______________ __________ \n")
-print(skew_info)
+print(" ~~~~~~~~~~ ~~~~~~~~~~~~~~ ~~~~~~~~~~ \n")
 
 hitmap_train = final_train.copy()
 hitmap_train['Outcome'] = y_train
@@ -263,49 +253,49 @@ hitmap_train['Outcome'] = y_train
 
 # hit_map : 2
 if 0<(controler.hit_map -2+1)  or controler.all:
-    checker_v2.hitmap(hitmap_train, 'Outcome', 'raw_dataset_2nd_final')
+    checker_v2.hitmap(hitmap_train, 'Outcome', 'train_with_outcome_final')
     #checker_v2.hitmap(train, 'Outcome')
 
 # hist_plot : 2
 if 0<(controler.hist_plot -2+1)  or controler.all:
-    checker_v2.hist_plot(all_data, 'All_data_Final')
+    checker_v2.hist_plot(all_data, 'all_data_Final')
     #checker_v2.hist_plot(final_train)
     #checker_v2.hist_plot(final_test)
 
 # skew_plot : 3
 if 0<(controler.skew_plot -3+1) or controler.all:
     for clmn in all_data:
-        checker_v2.skew_plot(all_data[clmn], 'After transformation')
+        checker_v2.skew_plot(all_data[clmn], 'all_data After transformation')
 
 # scatter_plot : 1
 if 0<(controler.scatter_plot -4+1) or controler.all:
     for i in numerics_outliars:
-        checker_v2.scatter_plot(train, i, 'After tranformation : '+i)
+        checker_v2.scatter_plot(train, i, 'all_data After tranformation : '+i)
 ####################################################################################################
 #                                   shaving all_data final
 ####################################################################################################
+print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 if controler.save_all_data  or controler.all:
-    all_data.to_csv(path+'Final_dataset project_v3 actual_split.csv')
-    print('\nAll final data has been saved at : '+path+'Final_dataset project_v3 actual_split.csv\n')
+    all_data.to_csv(path+'Final_dataset actual_split.csv')
+    print('\nAll final data has been saved at : '+path+'Final_dataset actual_split.csv')
 
-print('__________________________________________________________________________________________')
 print('\nfinal :: all_data shape (Rows, Columns) & Columns-(without :: Id only): ', all_data.shape)
-print('\n')
+print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 ####################################################################################################
 #                                   functions of modeling
 ####################################################################################################
 def get_train_label():
-    print("\n------------------------------\ny_train shape:", y_train.shape)
+    print("\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \ny_train shape:", y_train.shape)
     return y_train
 
 def get_IDs():
-    print("\n------------------------------\ntest_ID, train_ID shape :", test_ID.shape, train_ID.shape)
+    print("\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \ntest_ID, train_ID shape :", test_ID.shape, train_ID.shape)
     return test_ID, train_ID
 
 def get_train_test_data():
-    #print('\n------------------------------\nX_train dtypes :\n------------------------------\n{0}'.format(final_train.dtypes))
-    #print('\n------------------------------\n X_test dtypes :\n------------------------------\n{0}'.format(final_test.dtypes))
-    print('\n------------------------------\nX_train, X_test: ', final_train.shape, final_test.shape)
+    #print('\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \nX_train dtypes :\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n{0}'.format(final_train.dtypes))
+    #print('\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n X_test dtypes :\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n{0}'.format(final_test.dtypes))
+    print('\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \nX_train, X_test: ', final_train.shape, final_test.shape)
     return final_train, final_test
 
     

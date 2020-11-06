@@ -9,7 +9,7 @@ import pandas as pd
 
 
 from programs import controler
-from programs import model_database
+from programs import model_database_v1 as model_database
 pd.set_option('display.float_format', lambda x: '{:.4f}'.format(x))
 ####################################################################################################
 #                                   Load project
@@ -87,21 +87,21 @@ def cv_rmse(model):
 model_weight = []
 model_weight = []
 model_dicty = {
-                'ridgec'         :   model_database.ridgec,
+                'ridgec'        :   model_database.ridgec,
                 'lr_elasticnet' :   model_database.lr_elasticnet,
                 'svc'           :   model_database.svc,
-                'gbc'           :   model_database.gbc,
-                'lightgbmc'     :   model_database.lightgbmc,
-                'xgboostc'      :   model_database.xgboostc,
-                'LogReg'        :   model_database.LogisticRegression,
-                'knn'           :   model_database.KNeighborsClassifier,
-                'SVC2'          :   model_database.SVC2,
-                'decissionTree' :   model_database.DecisionTreeClassifier,
+#                'gbc'           :   model_database.gbc,
+#  not support   'lightgbmc'     :   model_database.lightgbmc,
+#                'xgboostc'      :   model_database.xgboostc,
+#                'LogReg'        :   model_database.LogisticRegression,
+#                'knn'           :   model_database.KNeighborsClassifier,
+#                'SVC2'          :   model_database.SVC2,
+#                'decissionTree' :   model_database.DecisionTreeClassifier,
                 'adaboost'      :   model_database.AdaBoostClassifier,
                 'GradientBoost' :   model_database.GradientBoostingClassifier,
-                'GaussianNB'    :   model_database.GaussianNB,
-                'RabdomForest'  :   model_database.RandomForestClassifier,
-                'ExtraTree'     :   model_database.ExtraTreesClassifier
+#                'GaussianNB'    :   model_database.GaussianNB,
+#                'RabdomForest'  :   model_database.RandomForestClassifier,
+#                'ExtraTree'     :   model_database.ExtraTreesClassifier
 
                 }
 
@@ -147,21 +147,27 @@ for name, model in model_dicty.items():
 
 
 def blend_models_predict(X, Y, test=0):
+    best_acc = best_acc_index = count = 0
     m_predict = []
     for name, m_fit in m_fit_dicty.items():
         predict = m_fit.predict(X)
         m_predict.append(predict)
         if test:
             _, acc = accuracy_calculator(name, predict, Y)
+            if acc > best_acc:
+                best_acc = acc
+                best_acc_index = count
             save_80_acc(acc, name)
+        count += 1
     
+    #print('best_acc_index =',best_acc_index)
     # Max voting among predictions
     result = np.array([])
     for i in range(0, len(m_predict[0])):
         try:
             result = np.append(result, mode([clm[i] for clm in m_predict]))
         except:
-            result = np.append(result, m_predict[0][i])
+            result = np.append(result, m_predict[best_acc_index][i])
     return result
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -199,7 +205,8 @@ print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 ####################################################################################################
 save_80_acc(c_acc, 'Combine')
 ####################################################################################################
-if c_acc > 84:
+if c_acc > 87:
     file_name = controler.resut_file_name + '_with acc:_{0:.2f}.csv'.format(c_acc)
+    print('Result saved in :~> ', output_path+file_name)
     result_file.to_csv(output_path + file_name, index=False)
 
