@@ -31,6 +31,8 @@ train_ID = train.Id.reset_index(drop=True) # tracking train's 'Id'
 test_ID = test.Id.reset_index(drop=True) # tracking test's 'Id'
 y_train = train.Outcome.reset_index(drop=True) # tracking train's 'Outcome'
 
+test.drop(['Id'], axis=1, inplace=True) # droping 'Id' from test
+train.drop(['Id'], axis = 1, inplace=True) # droping 'Id', 'Outcome' from train
 
 raw_dataset = pd.concat([train, test]).reset_index(drop=True) # concatenation
 print('raw_dataset : \n{0}'.format(raw_dataset.dtypes))
@@ -39,7 +41,7 @@ print('raw_dataset : \n{0}'.format(raw_dataset.dtypes))
 ####################################################################################################
 # hit_map : 1
 if 0<(controler.hit_map -1+1) or controler.all:
-    checker_v2.hitmap(raw_dataset, 'Outcome', 'raw_dataset_Prime')
+    checker_v2.hitmap(train, 'Outcome', 'raw_dataset_Prime')
     #checker_v2.hitmap(train, 'Outcome')
 
 # hist_plot : 1
@@ -70,8 +72,8 @@ if 0<(controler.missing_data -1+1) or controler.all:
 ####################################################################################################
 #                                   data dropping
 ####################################################################################################
-train.drop(['Id', 'Outcome'], axis = 1, inplace=True) # droping 'Id', 'Outcome' from train
-test.drop(['Id'], axis=1, inplace=True) # droping 'Id' from test
+train.drop(['Outcome'], axis = 1, inplace=True) # droping 'Id', 'Outcome' from train
+
 
 all_data = pd.concat([train, test]).reset_index(drop=True) # concatenation
 print('\n\nall_data : \n{0}'.format(all_data.dtypes))
@@ -254,13 +256,14 @@ print(all_data.skew())
 print(" __________ ______________ __________ \n")
 print(skew_info)
 
-
-raw_dataset_2nd = all_data
-raw_dataset_2nd['Outcome'] = raw_dataset['Outcome']
+hitmap_train = final_train.copy()
+hitmap_train['Outcome'] = y_train
+#print('-------------final_train-------------\n{0}'.format(final_train.dtypes))
+#print('-------------hitmap_train-------------\n{0}'.format(hitmap_train.dtypes))
 
 # hit_map : 2
 if 0<(controler.hit_map -2+1)  or controler.all:
-    checker_v2.hitmap(raw_dataset_2nd, 'Outcome', 'raw_dataset_2nd_final')
+    checker_v2.hitmap(hitmap_train, 'Outcome', 'raw_dataset_2nd_final')
     #checker_v2.hitmap(train, 'Outcome')
 
 # hist_plot : 2
