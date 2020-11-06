@@ -3,6 +3,7 @@ from sklearn.metrics import mean_squared_error
 
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt  # data manipulation
+from statistics import mode
 import numpy as np
 import pandas as pd
 
@@ -67,8 +68,8 @@ def accuracy_calculator(model_name, y_pred, Y_true):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # root mean square error function
-def rmse(Y_actual, y_pred):
-    return np.sqrt(mean_squared_error(Y_actual, y_pred))
+def rmse(y_train, y_pred):
+    return np.sqrt(mean_squared_error(y_train, y_pred))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # model scoring function
@@ -87,20 +88,20 @@ model_weight = []
 model_weight = []
 model_dicty = {
                 'ridgec'         :   model_database.ridgec,
-#                'lr_elasticnet' :   model_database.lr_elasticnet,
+                'lr_elasticnet' :   model_database.lr_elasticnet,
                 'svc'           :   model_database.svc,
-#                'gbc'           :   model_database.gbc,
-#                'lightgbmc'     :   model_database.lightgbmc,
-#                'xgboostc'      :   model_database.xgboostc,
-#                'LogReg'        :   model_database.LogisticRegression,
-#                'knn'           :   model_database.KNeighborsClassifier,
-#                'SVC2'          :   model_database.SVC2,
-#                'decissionTree' :   model_database.DecisionTreeClassifier,
-#                'adaboost'      :   model_database.AdaBoostClassifier,
-#                'GradientBoost' :   model_database.GradientBoostingClassifier,
-#                'GaussianNB'    :   model_database.GaussianNB,
-#                'RabdomForest'  :   model_database.RandomForestClassifier,
-#                'ExtraTree'     :   model_database.ExtraTreesClassifier
+                'gbc'           :   model_database.gbc,
+                'lightgbmc'     :   model_database.lightgbmc,
+                'xgboostc'      :   model_database.xgboostc,
+                'LogReg'        :   model_database.LogisticRegression,
+                'knn'           :   model_database.KNeighborsClassifier,
+                'SVC2'          :   model_database.SVC2,
+                'decissionTree' :   model_database.DecisionTreeClassifier,
+                'adaboost'      :   model_database.AdaBoostClassifier,
+                'GradientBoost' :   model_database.GradientBoostingClassifier,
+                'GaussianNB'    :   model_database.GaussianNB,
+                'RabdomForest'  :   model_database.RandomForestClassifier,
+                'ExtraTree'     :   model_database.ExtraTreesClassifier
 
                 }
 
@@ -109,7 +110,7 @@ model_dicty = {
 #                                   save high accuracy dataset
 ####################################################################################################
 def save_80_acc(acc, name):
-    if acc > 80 and random_split:
+    if acc > 87.66 and random_split:
         import os
         path = "output/set_of_+80_acc/{0:.2f}_for_{1}".format(acc, name)
         save_path = "./output/set_of_+80_acc/{0:.2f}_for_{1}/".format(acc, name)
@@ -153,16 +154,15 @@ def blend_models_predict(X, Y, test=0):
         if test:
             _, acc = accuracy_calculator(name, predict, Y)
             save_80_acc(acc, name)
-
-    combine = 0
-    if len(model_weight) == len(model_dicty):
-        for pred, w in zip(m_predict, model_weight):
-                combine = combine + (pred * w)
-    else:
-        for pred in m_predict:
-            combine = combine + pred
-
-    return combine
+    
+    # Max voting among predictions
+    result = np.array([])
+    for i in range(0, len(m_predict[0])):
+        try:
+            result = np.append(result, mode([clm[i] for clm in m_predict]))
+        except:
+            result = np.append(result, m_predict[0][i])
+    return result
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 print('\n~~~~~~~~~~~~~~~~~~~~~~For, Train data~~~~~~~~~~~~~~~~~~~~~~~~~~')
@@ -190,9 +190,7 @@ result_file['Outcome'] = result_file['Outcome'].apply(lambda x: x if x < q2 else
 print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 result_file['Outcome'], c_acc = accuracy_calculator('Combine', result_file['Outcome'], y_test)
-
-rmse = rmse(y_test, result_file['Outcome'])
-print('\nrmse score on test data  :~>  ', rmse)
+#print("\nAccuracy score: %.8f" % (y_test == result_file['Outcome']).mean())
 print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 #print(pp)
@@ -201,6 +199,7 @@ print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 ####################################################################################################
 save_80_acc(c_acc, 'Combine')
 ####################################################################################################
-file_name = controler.resut_file_name + '_with acc:_{0:.2f}.csv'.format(c_acc)
-result_file.to_csv(output_path + file_name, index=False)
+if c_acc > 84:
+    file_name = controler.resut_file_name + '_with acc:_{0:.2f}.csv'.format(c_acc)
+    result_file.to_csv(output_path + file_name, index=False)
 

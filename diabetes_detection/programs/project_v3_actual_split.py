@@ -23,24 +23,17 @@ checker_v2.path = path = "./output/Data_observation/"
 
 train = pd.read_csv('./input/train.csv')
 test = pd.read_csv('./input/test.csv')
-raw_dataset = pd.read_csv('./input/diabetes_raw_1.csv')
+#raw_dataset = pd.read_csv('./input/diabetes_raw_1.csv')
 ####################################################################################################
 #                                   data capture
 ####################################################################################################
-train_ID = train['Id'] # tracking train's 'Id'
-test_ID = test['Id'] # tracking test's 'Id'
-
-# drop 'Id' colum since it's unnecessary for  the prediction process.
-train.drop(['Id'], axis=1, inplace=True)
-test.drop(['Id'], axis=1, inplace=True)
-raw_dataset.drop(['Id'], axis=1, inplace=True)
-
-# remove target column from train
+train_ID = train.Id.reset_index(drop=True) # tracking train's 'Id'
+test_ID = test.Id.reset_index(drop=True) # tracking test's 'Id'
 y_train = train.Outcome.reset_index(drop=True) # tracking train's 'Outcome'
-df_train = train.drop(['Outcome'], axis = 1) # droping 'Outcome' from train
-df_test = test # assign test
 
-all_data = pd.concat([df_train, df_test]).reset_index(drop=True) # concatenation
+
+raw_dataset = pd.concat([train, test]).reset_index(drop=True) # concatenation
+print('raw_dataset : \n{0}'.format(raw_dataset.dtypes))
 ####################################################################################################
 #                                   data checking
 ####################################################################################################
@@ -51,14 +44,14 @@ if 0<(controler.hit_map -1+1) or controler.all:
 
 # hist_plot : 1
 if 0<(controler.hist_plot -1+1) or controler.all:
-    checker_v2.hist_plot(all_data, 'All_Data_Prime')
+    checker_v2.hist_plot(raw_dataset, 'raw_dataset_Prime')
     #checker_v2.hist_plot(train)
     #checker_v2.hist_plot(test)
 
 # skew_plot : 1
 if 0<(controler.skew_plot -1+1) or controler.all:
-    for clmn in all_data:
-        checker_v2.skew_plot(all_data[clmn], 'prime')
+    for clmn in raw_dataset:
+        checker_v2.skew_plot(raw_dataset[clmn], 'prime')
 
 # scatter_plot : 1
 numerics_outliars = train
@@ -73,7 +66,15 @@ elif 0<(controler.scatter_plot -2+1)  or controler.all:
 
 # missing data checking : 1
 if 0<(controler.missing_data -1+1) or controler.all:
-    checker_v2.missing_data(all_data, controler.save_column_name)
+    checker_v2.missing_data(raw_dataset, controler.save_column_name)
+####################################################################################################
+#                                   data dropping
+####################################################################################################
+train.drop(['Id', 'Outcome'], axis = 1, inplace=True) # droping 'Id', 'Outcome' from train
+test.drop(['Id'], axis=1, inplace=True) # droping 'Id' from test
+
+all_data = pd.concat([train, test]).reset_index(drop=True) # concatenation
+print('\n\nall_data : \n{0}'.format(all_data.dtypes))
 ####################################################################################################
 #                                   shaving all_data as prime
 ####################################################################################################
@@ -227,8 +228,8 @@ if controler.log_normalization_on_target  or controler.all:
 ####################################################################################################
 #                                   all_data spliting
 ####################################################################################################
-final_train = all_data.iloc[:len(y_train), :]
-final_test = all_data.iloc[len(df_train):, :]
+final_train = all_data.iloc[:len(train), :]
+final_test = all_data.iloc[len(train):, :]
 
 ##############################~~~~~~over fit handinig~~~~~##########################################
 #overfit = ['Pregnancies']
