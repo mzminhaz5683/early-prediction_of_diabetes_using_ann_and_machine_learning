@@ -36,15 +36,15 @@ resut_file_name = 'model'
 #                                  ANN model controller
 ####################################################################################################
 # saved_model_dir = './output/checkpoint/saved/{0}.h5'.format(test_parameters)
-test_parameters = '86.4_ann_model'
+test_parameters = '87.7_ann_model'
 
-activate_train = 1 #0/1
+activate_train = 0 #0/1
 target_acc = 80
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 initial_weight = 0.01
 alpha_lrelu = 0 # 0/0.1
 leakyRelu = 1 #0/1
-train_epochs = 300
+train_epochs = 900
 
 dropout = [0.10, 0.15, 0.20]
 #dns = [32, 32, 64, 128, 128, 256]

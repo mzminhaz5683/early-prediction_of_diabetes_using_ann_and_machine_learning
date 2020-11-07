@@ -48,7 +48,7 @@ else:
 #                                   Load documents
 ####################################################################################################
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-print('             model start for : {0}'.format(project))
+print('            ANN model start for : {0}'.format(project))
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 try:
         y_test = project_analyser.get_actual_result()
@@ -189,7 +189,7 @@ if activate_train:
         model_cp = saved_model_checkpoint()
         lr_controller = reduce_lr()
         early_stopping = set_early_stopping()
-        ####################################################################################################
+        ############################################################################################
 
         model.compile(loss='sparse_categorical_crossentropy',
                 optimizer="sgd",metrics=['accuracy'])
@@ -216,22 +216,30 @@ if activate_train:
 ####################################################################################################
 #                                   predecting
 ####################################################################################################
-if activate_train:
-        test_model = read_model(model_checkpoint_dir)
-else:
-        test_model = read_model(saved_model_dir)
+def test_prediction(activate_train = activate_train):      
+        if activate_train:
+                test_model = read_model(model_checkpoint_dir)
+        else:
+                test_model = read_model(saved_model_dir)
 
-predictions = test_model.predict(X_test)
-label_pred = np.argmax(predictions, axis = 1)
+        predictions = test_model.predict(X_test)
+        label_pred = np.argmax(predictions, axis = 1)
 
-#convet numpy vector into list
-result = []
-result += label_pred.tolist()
+        #convet numpy vector into list
+        result = []
+        result += label_pred.tolist()
 
-y_pred_f, acc = accuracy_calculator('\n\nANN', result, y_test)
+        y_pred_f, acc = accuracy_calculator('\n\nANN [Test Case]', result, y_test)
+        return y_pred_f, acc
+####################################################################################################
+_, acc = test_prediction(activate_train)
 
-if acc > target_acc:
+if acc > target_acc and activate_train:
         destination = './output/set_of_+80_ann_h5/{0:.1f}_ann_model.h5'.format(acc)
         string = "cp '{0}' '{1}'".format(model_checkpoint_dir, destination)
         #print(string)
         os.popen(string)
+
+
+def get_test_result():
+        return test_prediction()
