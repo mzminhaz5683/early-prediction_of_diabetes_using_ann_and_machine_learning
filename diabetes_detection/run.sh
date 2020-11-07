@@ -18,12 +18,12 @@ clear
 
 
 ##################################################################################################
-for ((a=01; a <= 1 ; a++))
+for ((a=01; a <= 20 ; a++))
 do
 
 #python3 -m programs.project_model_v11
 #python3 -m programs.project_v3_actual_split
-python3 -m programs.ann_model_v3
+python3 -m programs.ann_model_v4
 
 read -t 20 -p "wait for 20 seconds only ..."
 done
