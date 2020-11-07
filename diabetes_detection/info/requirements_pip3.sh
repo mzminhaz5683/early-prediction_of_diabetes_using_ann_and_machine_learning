@@ -14,3 +14,5 @@ pip3 install xgboost
 pip3 install lightgbm
 pip3 install statistics
 pip3 install -U mlens
+pip3 install keras
+pip3 install tensorflow

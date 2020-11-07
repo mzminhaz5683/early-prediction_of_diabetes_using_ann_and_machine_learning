@@ -1,7 +1,6 @@
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error
 
-from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt  # data manipulation
 from statistics import mode
 import numpy as np
@@ -10,6 +9,7 @@ import pandas as pd
 
 from programs import controler
 from programs import model_database
+from programs.checker_v2 import accuracy_calculator
 pd.set_option('display.float_format', lambda x: '{:.4f}'.format(x))
 ####################################################################################################
 #                                   Load project
@@ -21,9 +21,6 @@ if controler.project_version == 3:
         from programs import project_v3_actual_split as project_analyser
         project = 'project_v3_actual_split'
         random_split = 0
-elif controler.project_version == 4:
-        from programs import project_v4_random_split as project_analyser
-        project = 'project_v4_random_split'
 elif controler.project_version == 5:
         from programs import project_v5_random_split as project_analyser
         project = 'project_v5_random_split'
@@ -50,22 +47,6 @@ X_test_ID, X_train_ID = project_analyser.get_IDs()
 #                                   result functions
 ####################################################################################################
 result_file = pd.DataFrame({'Id':X_test_ID})
-#Forming a confusion matrix to check our accuracy
-def accuracy_calculator(model_name, y_pred, Y_true):
-    pp = []
-    for p in y_pred:
-        if p>0.5:
-            pp.append(1)
-        else:
-            pp.append(0)
-
-    y_pred_f = pp
-    cm=confusion_matrix(Y_true,y_pred_f)
-    acc = (cm[0][0]+cm[1][1])/(cm[0][0]+cm[0][1]+cm[1][0]+cm[1][1])*100
-    print('{0} model accuracy : {1:.2f} %'.format(model_name, acc))
-    print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    return y_pred_f, acc
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # root mean square error function
 def rmse(y_train, y_pred):
@@ -102,7 +83,6 @@ model_dicty = {
 #                'GaussianNB'    :   model_database.GaussianNB,
                 'RabdomForest'  :   model_database.RandomForestClassifier,
 #                'ExtraTree'     :   model_database.ExtraTreesClassifier
-
                 }
 
 ####################################################################################################

@@ -90,7 +90,7 @@ print('\nprime :: all_data shape (Rows, Columns) & Columns-(without :: Id, Outco
 #                                   data operation - Multi level missing data handling
 ####################################################################################################
 # single level data handling
-all_data.loc[189, 'SkinThickness'] = 63
+#all_data.loc[189, 'SkinThickness'] = 63
 
 if controler.multi_level_Data_Handling  or controler.all:
     ###############~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##########################################
@@ -167,6 +167,8 @@ if controler.class_creating  or controler.all:
     all_data['BMIClass'] = 0
     class_generator('BMI', 'BMIClass', [18, 25, 30, 40], [1,2,3,4,5])
 
+    all_data['PregClass'] = 0
+    class_generator('Pregnancies', 'PregClass', [1, 4, 7, 11], [1,2,3,4,5])
 else:
     print('object to numeric converter : deactiveted\n')
 ####################################################################################################
@@ -205,34 +207,25 @@ print(" ~~~~~~~~~~ ~~~~~~~~~~~~~~ ~~~~~~~~~~ \n")
 
 
 if controler.log_normalization_on_target  or controler.all:
-    
-    if 0:
-        all_data['Glucose']                 = np.log1p(all_data['Glucose'])
-        all_data['SkinThickness']           = np.sqrt(all_data['SkinThickness'])
-        all_data['Insulin']                 = np.log10(np.log10(np.log10(all_data['Insulin'])))
-        all_data['BMI']                     = np.log1p(all_data['BMI'])
-        all_data['DiabetesPedigreeFunction']= np.log10(all_data['DiabetesPedigreeFunction'])
-        all_data['Age']                     = np.log10(np.log10(np.log10(all_data['Age'])))
-        all_data['AgeClass']                = np.log2(all_data['AgeClass'])
-        all_data['BPClass']                 = np.sqrt(all_data['BPClass'])
-    else:
-        all_data['Glucose']                 = np.log1p(all_data['Glucose'])
-        all_data['SkinThickness']           = np.log1p(all_data['SkinThickness'])
-        all_data['BMI']                     = np.log1p(all_data['BMI'])
-        all_data['AgeClass']                = np.log1p(all_data['AgeClass'])
-        all_data['BPClass']                 = np.log1p(all_data['BPClass'])
 
-        all_data['Insulin']                 = (np.log1p(np.log1p(all_data['Insulin'])))
-        all_data['DiabetesPedigreeFunction']= (np.log1p(np.log1p(all_data['DiabetesPedigreeFunction'])))
-        all_data['Age']                     = (np.log1p(np.log1p(all_data['Age'])))
+    all_data['SkinThickness']           = np.log1p(all_data['SkinThickness'])
+    all_data['PregClass']               = np.log1p(all_data['PregClass'])    
+    all_data['Glucose']                 = np.log1p(all_data['Glucose'])
+    all_data['BPClass']                 = np.log1p(all_data['BPClass'])
+    all_data['BMI']                     = np.log1p(all_data['BMI'])
+
+    all_data['DiabetesPedigreeFunction']= np.sqrt(np.log1p(np.log1p(all_data['DiabetesPedigreeFunction'])))
+    all_data['Insulin']                 = np.sqrt(np.log1p(np.log1p(all_data['Insulin'])))
+    all_data['Age']                     = np.sqrt(np.log1p(np.log1p(all_data['Age'])))
+    all_data['AgeClass']                = np.log1p(np.log1p(all_data['AgeClass']))
 
 
     # BMIClass, GlucoClass : are in chipest skew
 
 ##############################~~~~~~over fit handinig~~~~~##########################################
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-#overfit = ['Pregnancies']
-overfit = []
+overfit = ['Pregnancies']
+#overfit = []
 for i in all_data.columns:
     counts = all_data[i].value_counts()
     zeros = counts.iloc[0]

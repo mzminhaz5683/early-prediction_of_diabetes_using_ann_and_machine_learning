@@ -7,6 +7,7 @@ import numpy as np # linear algebra
 from scipy.stats import norm #for some statistics
 from scipy import stats  # scientific notation handler
 from matplotlib import pyplot # hist plot group
+from sklearn.metrics import confusion_matrix
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -84,3 +85,22 @@ def general_distribution(file, cell):
     sns.distplot(file[file[cell]>0][cell], fit=norm)
     fig = plt.figure()
     res = stats.probplot(file[file[cell]>0][cell], plot=plt)
+
+####################################################################################################
+#                                   result functions
+####################################################################################################
+#Forming a confusion matrix to check our accuracy
+def accuracy_calculator(model_name, y_pred, Y_true):
+    pp = []
+    for p in y_pred:
+        if p>0.5:
+            pp.append(1)
+        else:
+            pp.append(0)
+
+    y_pred_f = pp
+    cm=confusion_matrix(Y_true,y_pred_f)
+    acc = (cm[0][0]+cm[1][1])/(cm[0][0]+cm[0][1]+cm[1][0]+cm[1][1])*100
+    print('{0} model accuracy : {1:.2f} %'.format(model_name, acc))
+    print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    return y_pred_f, acc

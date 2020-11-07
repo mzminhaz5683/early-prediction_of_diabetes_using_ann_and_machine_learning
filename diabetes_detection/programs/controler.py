@@ -30,5 +30,5 @@ rndm_state = 42         # 0 best: 10
 n_estimators = 10       # 10 best: 15
 criterion = 'gini'      # entropy , gini best: gini
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-project_version = 3
+project_version = 3     # 3/5
 resut_file_name = 'model'

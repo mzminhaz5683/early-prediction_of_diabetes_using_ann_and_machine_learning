@@ -14,3 +14,5 @@ pip install xgboost
 pip install lightgbm
 pip install statistics
 pip install -U mlens
+pip install keras
+pip install tensorflow
