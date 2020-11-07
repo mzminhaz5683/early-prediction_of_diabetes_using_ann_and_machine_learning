@@ -24,6 +24,8 @@ from programs.controler import leakyRelu
 from programs.controler import activate_train
 from programs.controler import test_parameters
 from programs.controler import dropout
+from programs.controler import train_epochs
+from programs.controler import target_acc
 from programs.controler import dns
 pd.set_option('display.float_format', lambda x: '{:.4f}'.format(x))
 ####################################################################################################
@@ -194,13 +196,13 @@ if activate_train:
 
         if 0:
                 model.fit(ann_train, ann_y_train,
-                        epochs=100,
+                        epochs=train_epochs,
                         verbose=2, # 1 = 71
                         validation_data=(ann_test, ann_y_test),
                         callbacks=[early_stopping, model_cp, lr_controller])
         else:
                 model.fit(ann_train, ann_y_train,
-                epochs=100,
+                epochs=train_epochs,
                 verbose=2, # 1 = 71
                 validation_data=(ann_test, ann_y_test),
                 callbacks=[model_cp, lr_controller])  
@@ -228,7 +230,7 @@ result += label_pred.tolist()
 
 y_pred_f, acc = accuracy_calculator('\n\nANN', result, y_test)
 
-if acc > 85:
+if acc > target_acc:
         destination = './output/set_of_+80_ann_h5/{0:.1f}_ann_model.h5'.format(acc)
         string = "cp '{0}' '{1}'".format(model_checkpoint_dir, destination)
         #print(string)
