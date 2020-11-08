@@ -69,21 +69,21 @@ def cv_rmse(model):
 model_weight = []
 model_weight = []
 model_dicty = {
-                'ridgec'        :   model_database.ridgec,
-                'lr_elasticnet' :   model_database.lr_elasticnet,
-                'svc'           :   model_database.svc,
-#                'gbc'           :   model_database.gbc,
-#                'lightgbmc'     :   model_database.lightgbmc,
-                'xgboostc'      :   model_database.xgboostc,
-                'LogReg'        :   model_database.LogisticRegression,
-#                'knn'           :   model_database.KNeighborsClassifier,
-#                'SVC2'          :   model_database.SVC2,
-#                'decissionTree' :   model_database.DecisionTreeClassifier,
-                'adaboost'      :   model_database.AdaBoostClassifier,
-#                'GradientBoost' :   model_database.GradientBoostingClassifier,
-#                'GaussianNB'    :   model_database.GaussianNB,
-#                'RabdomForest'  :   model_database.RandomForestClassifier,
-#                'ExtraTree'     :   model_database.ExtraTreesClassifier
+                'ridgec'        :   model_database.ridgec,                      # RidgeClassifierCV
+                'lr_elasticnet' :   model_database.lr_elasticnet,               # LogisticRegression(penalty = 'elasticnet')
+                'svc'           :   model_database.svc,                         # SVC ( 'C': 0.7678, 'penalty': 'l1' )
+#                'gbc'           :   model_database.gbc,                         # GradientBoostingClassifier
+#                'lightgbmc'     :   model_database.lightgbmc,                   # LGBMClassifier
+                'xgboostc'      :   model_database.xgboostc,                    # XGBClassifier
+                'LogReg'        :   model_database.LogisticRegression,          # LogisticRegression
+#                'knn'           :   model_database.KNeighborsClassifier,        # KNeighborsClassifier
+#                'SVC2'          :   model_database.SVC2,                        # SVC ( 'C': 1.7, 'kernel': 'rbf' )
+#                'decissionTree' :   model_database.DecisionTreeClassifier,      # DecisionTreeClassifier
+                'adaboost'      :   model_database.AdaBoostClassifier,          # AdaBoostClassifier
+#                'GradientBoost' :   model_database.GradientBoostingClassifier,  # GradientBoostingClassifier
+#                'GaussianNB'    :   model_database.GaussianNB,                  # GaussianNB
+#                'RabdomForest'  :   model_database.RandomForestClassifier,      # RandomForestClassifier
+#                'ExtraTree'     :   model_database.ExtraTreesClassifier         # ExtraTreesClassifier
                 }
 
 ####################################################################################################
