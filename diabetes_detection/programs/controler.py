@@ -13,10 +13,10 @@ multi_level_Data_Handling = 1 #0/1
 ####################################################################################################
 #                                   data checkig
 ####################################################################################################
-hit_map = 2 #0/1/2
+hit_map = 0 #0/1/2
 hist_plot = 0 #0/1/2
-skew_plot = 0 #0/1/2/3
-scatter_plot = 0 #0/1/
+skew_plot = 0 #0/1/2/3 /4 for seeing the transformation effect only
+scatter_plot = 0 #0/1
 missing_data = 0 #0/1/2
 ####################################################################################################
 #                                   data transformation
@@ -44,7 +44,7 @@ target_acc = 80
 initial_weight = 0.01
 alpha_lrelu = 0 # 0/0.1
 leakyRelu = 1 #0/1
-train_epochs = 900
+train_epochs = 300
 
 dropout = [0.10, 0.15, 0.20]
 #dns = [32, 32, 64, 128, 128, 256]

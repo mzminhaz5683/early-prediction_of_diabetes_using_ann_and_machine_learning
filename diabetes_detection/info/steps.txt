@@ -1,7 +1,0 @@
-data minig:
-    ID:                     add lebel(Id) for full dataset(768)
-    train.csv, test.csv:    splite dataset(768) into train(568) + test(200)
-    result.csv (Y):         copy Id column, cut outcome column of test & marge them into new csv file 
-
-data processing:
-    
