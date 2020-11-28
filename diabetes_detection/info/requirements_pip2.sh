@@ -1,5 +1,3 @@
-@echo on
-
 pip install numpy
 pip install scipy
 pip install pandas
@@ -18,5 +16,3 @@ pip install statistics
 pip install -U mlens
 pip install keras
 pip install tensorflow
-
-pause
