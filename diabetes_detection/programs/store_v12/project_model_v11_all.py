@@ -10,8 +10,7 @@ import pandas as pd
 from programs import controler
 from programs import model_database
 from programs.checker_v2 import accuracy_calculator
-if controler.class_creating:
-    from programs.ann_model_v4 import get_test_result
+from programs.ann_model_v4 import get_test_result
 pd.set_option('display.float_format', lambda x: '{:.4f}'.format(x))
 ####################################################################################################
 #                                   Load project
@@ -131,7 +130,7 @@ for name, model in model_dicty.items():
 def blend_models_predict(X, Y, test=0):
     best_acc = best_acc_index = count = 0
     m_predict = []
-    if test and controler.class_creating:
+    if test:
         y_ann, best_acc = get_test_result()
         m_predict.append(y_ann)
         best_acc_index = count = 1

@@ -132,17 +132,6 @@ if controler.multi_level_Data_Handling  or controler.all:
     w = [0.22, 0.20, 0.39, 0.28]
     missing_value_handler('BMI', p, w)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-elif controler.multi_level_Data_Handling_general:
-    def missing_value_handler(clmn):
-        median = all_data[clmn].median()
-        for i in range(0, len(all_data[clmn])):
-            if all_data[clmn][i] == 0:
-                all_data[clmn][i] = median
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    clmn = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
-    for i in clmn:
-        missing_value_handler(i)
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 else:
     print('multi level data handling : off\n')
 ####################################################################################################

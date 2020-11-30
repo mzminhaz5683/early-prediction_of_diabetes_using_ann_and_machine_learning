@@ -10,8 +10,7 @@ import pandas as pd
 from programs import controler
 from programs import model_database
 from programs.checker_v2 import accuracy_calculator
-if controler.class_creating:
-    from programs.ann_model_v4 import get_test_result
+from programs.ann_model_v4 import get_test_result
 pd.set_option('display.float_format', lambda x: '{:.4f}'.format(x))
 ####################################################################################################
 #                                   Load project
@@ -73,18 +72,18 @@ model_dicty = {
                 'ridgec'        :   model_database.ridgec,                      # RidgeClassifierCV
                 'lr_elasticnet' :   model_database.lr_elasticnet,               # LogisticRegression(penalty = 'elasticnet')
                 'svc'           :   model_database.svc,                         # SVC ( 'C': 0.7678, 'penalty': 'l1' )
-                'gbc'           :   model_database.gbc,                         # GradientBoostingClassifier
-                'lightgbmc'     :   model_database.lightgbmc,                   # LGBMClassifier
+#                'gbc'           :   model_database.gbc,                         # GradientBoostingClassifier
+#                'lightgbmc'     :   model_database.lightgbmc,                   # LGBMClassifier
                 'xgboostc'      :   model_database.xgboostc,                    # XGBClassifier
                 'LogReg'        :   model_database.LogisticRegression,          # LogisticRegression
-                'knn'           :   model_database.KNeighborsClassifier,        # KNeighborsClassifier
-                'SVC2'          :   model_database.SVC2,                        # SVC ( 'C': 1.7, 'kernel': 'rbf' )
-                'decissionTree' :   model_database.DecisionTreeClassifier,      # DecisionTreeClassifier
+#                'knn'           :   model_database.KNeighborsClassifier,        # KNeighborsClassifier
+#                'SVC2'          :   model_database.SVC2,                        # SVC ( 'C': 1.7, 'kernel': 'rbf' )
+#                'decissionTree' :   model_database.DecisionTreeClassifier,      # DecisionTreeClassifier
                 'adaboost'      :   model_database.AdaBoostClassifier,          # AdaBoostClassifier
-                'GradientBoost' :   model_database.GradientBoostingClassifier,  # GradientBoostingClassifier
-                'GaussianNB'    :   model_database.GaussianNB,                  # GaussianNB
-                'RabdomForest'  :   model_database.RandomForestClassifier,      # RandomForestClassifier
-                'ExtraTree'     :   model_database.ExtraTreesClassifier         # ExtraTreesClassifier
+#                'GradientBoost' :   model_database.GradientBoostingClassifier,  # GradientBoostingClassifier
+#                'GaussianNB'    :   model_database.GaussianNB,                  # GaussianNB
+#                'RabdomForest'  :   model_database.RandomForestClassifier,      # RandomForestClassifier
+#                'ExtraTree'     :   model_database.ExtraTreesClassifier         # ExtraTreesClassifier
                 }
 
 ####################################################################################################
@@ -131,7 +130,7 @@ for name, model in model_dicty.items():
 def blend_models_predict(X, Y, test=0):
     best_acc = best_acc_index = count = 0
     m_predict = []
-    if test and controler.class_creating:
+    if test:
         y_ann, best_acc = get_test_result()
         m_predict.append(y_ann)
         best_acc_index = count = 1
