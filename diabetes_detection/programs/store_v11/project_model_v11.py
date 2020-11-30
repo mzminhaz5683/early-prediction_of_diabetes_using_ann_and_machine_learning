@@ -1,14 +1,16 @@
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error
 
-from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt  # data manipulation
+from statistics import mode
 import numpy as np
 import pandas as pd
 
 
 from programs import controler
 from programs import model_database
+from programs.checker_v2 import accuracy_calculator
+from programs.ann_model_v4 import get_test_result
 pd.set_option('display.float_format', lambda x: '{:.4f}'.format(x))
 ####################################################################################################
 #                                   Load project
@@ -20,9 +22,6 @@ if controler.project_version == 3:
         from programs import project_v3_actual_split as project_analyser
         project = 'project_v3_actual_split'
         random_split = 0
-elif controler.project_version == 4:
-        from programs import project_v4_random_split as project_analyser
-        project = 'project_v4_random_split'
 elif controler.project_version == 5:
         from programs import project_v5_random_split as project_analyser
         project = 'project_v5_random_split'
@@ -49,22 +48,6 @@ X_test_ID, X_train_ID = project_analyser.get_IDs()
 #                                   result functions
 ####################################################################################################
 result_file = pd.DataFrame({'Id':X_test_ID})
-#Forming a confusion matrix to check our accuracy
-def accuracy_calculator(model_name, y_pred, Y_true):
-    pp = []
-    for p in y_pred:
-        if p>0.5:
-            pp.append(1)
-        else:
-            pp.append(0)
-
-    y_pred_f = pp
-    cm=confusion_matrix(Y_true,y_pred_f)
-    acc = (cm[0][0]+cm[1][1])/(cm[0][0]+cm[0][1]+cm[1][0]+cm[1][1])*100
-    print('{0} model accuracy : {1:.2f} %'.format(model_name, acc))
-    print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    return y_pred_f, acc
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # root mean square error function
 def rmse(y_train, y_pred):
@@ -86,22 +69,21 @@ def cv_rmse(model):
 model_weight = []
 model_weight = []
 model_dicty = {
-                'ridgec'         :   model_database.ridgec,
-#                'lr_elasticnet' :   model_database.lr_elasticnet,
-                'svc'           :   model_database.svc,
-#                'gbc'           :   model_database.gbc,
-#                'lightgbmc'     :   model_database.lightgbmc,
-#                'xgboostc'      :   model_database.xgboostc,
-#                'LogReg'        :   model_database.LogisticRegression,
-#                'knn'           :   model_database.KNeighborsClassifier,
-#                'SVC2'          :   model_database.SVC2,
-#                'decissionTree' :   model_database.DecisionTreeClassifier,
-#                'adaboost'      :   model_database.AdaBoostClassifier,
-#                'GradientBoost' :   model_database.GradientBoostingClassifier,
-#                'GaussianNB'    :   model_database.GaussianNB,
-#                'RabdomForest'  :   model_database.RandomForestClassifier,
-#                'ExtraTree'     :   model_database.ExtraTreesClassifier
-
+                'ridgec'        :   model_database.ridgec,                      # RidgeClassifierCV
+                'lr_elasticnet' :   model_database.lr_elasticnet,               # LogisticRegression(penalty = 'elasticnet')
+                'svc'           :   model_database.svc,                         # SVC ( 'C': 0.7678, 'penalty': 'l1' )
+#                'gbc'           :   model_database.gbc,                         # GradientBoostingClassifier
+#                'lightgbmc'     :   model_database.lightgbmc,                   # LGBMClassifier
+                'xgboostc'      :   model_database.xgboostc,                    # XGBClassifier
+                'LogReg'        :   model_database.LogisticRegression,          # LogisticRegression
+#                'knn'           :   model_database.KNeighborsClassifier,        # KNeighborsClassifier
+#                'SVC2'          :   model_database.SVC2,                        # SVC ( 'C': 1.7, 'kernel': 'rbf' )
+#                'decissionTree' :   model_database.DecisionTreeClassifier,      # DecisionTreeClassifier
+                'adaboost'      :   model_database.AdaBoostClassifier,          # AdaBoostClassifier
+#                'GradientBoost' :   model_database.GradientBoostingClassifier,  # GradientBoostingClassifier
+#                'GaussianNB'    :   model_database.GaussianNB,                  # GaussianNB
+#                'RabdomForest'  :   model_database.RandomForestClassifier,      # RandomForestClassifier
+#                'ExtraTree'     :   model_database.ExtraTreesClassifier         # ExtraTreesClassifier
                 }
 
 ####################################################################################################
@@ -109,7 +91,7 @@ model_dicty = {
 #                                   save high accuracy dataset
 ####################################################################################################
 def save_80_acc(acc, name):
-    if acc > 80 and random_split:
+    if acc > 87.66 and random_split:
         import os
         path = "output/set_of_+80_acc/{0:.2f}_for_{1}".format(acc, name)
         save_path = "./output/set_of_+80_acc/{0:.2f}_for_{1}/".format(acc, name)
@@ -146,23 +128,33 @@ for name, model in model_dicty.items():
 
 
 def blend_models_predict(X, Y, test=0):
+    best_acc = best_acc_index = count = 0
     m_predict = []
+    if test:
+        y_ann, best_acc = get_test_result()
+        m_predict.append(y_ann)
+        best_acc_index = count = 1
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     for name, m_fit in m_fit_dicty.items():
         predict = m_fit.predict(X)
         m_predict.append(predict)
         if test:
             _, acc = accuracy_calculator(name, predict, Y)
+            if acc > best_acc:
+                best_acc = acc
+                best_acc_index = count
             save_80_acc(acc, name)
-
-    combine = 0
-    if len(model_weight) == len(model_dicty):
-        for pred, w in zip(m_predict, model_weight):
-                combine = combine + (pred * w)
-    else:
-        for pred in m_predict:
-            combine = combine + pred
-
-    return combine
+        count += 1
+    
+    #print('best_acc_index =',best_acc_index)
+    # Max voting among predictions
+    result = np.array([])
+    for i in range(0, len(m_predict[0])):
+        try:
+            result = np.append(result, mode([clm[i] for clm in m_predict]))
+        except:
+            result = np.append(result, m_predict[best_acc_index][i])
+    return result
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 print('\n~~~~~~~~~~~~~~~~~~~~~~For, Train data~~~~~~~~~~~~~~~~~~~~~~~~~~')
@@ -199,6 +191,8 @@ print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 ####################################################################################################
 save_80_acc(c_acc, 'Combine')
 ####################################################################################################
-file_name = controler.resut_file_name + '_with acc:_{0:.2f}.csv'.format(c_acc)
-result_file.to_csv(output_path + file_name, index=False)
+if c_acc > 87:
+    file_name = controler.resut_file_name + '_with acc:_{0:.2f}.csv'.format(c_acc)
+    print('Result saved in :~> ', output_path+file_name)
+    result_file.to_csv(output_path + file_name, index=False)
 

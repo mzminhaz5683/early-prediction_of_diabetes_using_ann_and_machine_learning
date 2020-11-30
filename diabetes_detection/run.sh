@@ -5,7 +5,8 @@ clear
 #python3 -m programs.project_v5_random_split
 
 
-python3 -m programs.project_model_v11
+#python3 -m programs.project_model_v11_all
+python3 -m programs.project_model_v11_best
 
 #python3 -m test
 #kill -9 PIDs

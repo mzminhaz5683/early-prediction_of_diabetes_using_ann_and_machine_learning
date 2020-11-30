@@ -1,63 +1,53 @@
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error
 
-from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt  # data manipulation
+from statistics import mode
 import numpy as np
 import pandas as pd
 
 
 from programs import controler
 from programs import model_database
+from programs.checker_v2 import accuracy_calculator
+from programs.ann_model_v4 import get_test_result
 pd.set_option('display.float_format', lambda x: '{:.4f}'.format(x))
 ####################################################################################################
 #                                   Load project
 ####################################################################################################
-output_path = './output/submission/'
-output = 'model'
+output_path = './output/predicted_results/'
 project = ''
+random_split = 1
 if controler.project_version == 3:
         from programs import project_v3_actual_split as project_analyser
         project = 'project_v3_actual_split'
-elif controler.project_version == 4:
-        from programs import project_v4_random_split as project_analyser
-        project = 'project_v4_random_split'
+        random_split = 0
+elif controler.project_version == 5:
+        from programs import project_v5_random_split as project_analyser
+        project = 'project_v5_random_split'
+else:
+    print("\n\n\n Can't find any process model \n\n\n")
+    exit(0)
 ####################################################################################################
 #                                   Load documents
 ####################################################################################################
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 print('             model start for : {0}'.format(project))
-print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-submission = pd.read_csv("./input/sample_submission.csv")
-actual_split = 1
+print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 try:
         y_test = project_analyser.get_actual_result()
-        actual_split = 0
+
 except:
         actual_result = pd.read_csv("./input/actual_result.csv")
         y_test = actual_result['Outcome'] # actual result
 
 X_train, X_test = project_analyser.get_train_test_data()
 y_train = project_analyser.get_train_label()
+X_test_ID, X_train_ID = project_analyser.get_IDs()
 ####################################################################################################
 #                                   result functions
 ####################################################################################################
-#Forming a confusion matrix to check our accuracy
-def accuracy_calculator(model_name, y_pred, Y_true):
-    pp = []
-    for p in y_pred:
-        if p>0.5:
-            pp.append(1)
-        else:
-            pp.append(0)
-
-    y_pred_f = pp
-    cm=confusion_matrix(Y_true,y_pred_f)
-    acc = (cm[0][0]+cm[1][1])/(cm[0][0]+cm[0][1]+cm[1][0]+cm[1][1])*100
-    print('{0} model accuracy : {1:.2f} %'.format(model_name, acc))
-    print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    return y_pred_f, acc
-
+result_file = pd.DataFrame({'Id':X_test_ID})
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # root mean square error function
 def rmse(y_train, y_pred):
@@ -76,26 +66,46 @@ def cv_rmse(model):
 # LogisticRegression KNeighborsClassifier SVC2 DecisionTreeClassifier AdaBoostClassifier GradientBoostingClassifier
 # GaussianNB RandomForestClassifier ExtraTreesClassifier
 
-model_weight = [0.1, 0.1, 0.15, 0.1, 0.1, 0.15, 0.3]
-model_dicty = {'ridgec'         :   model_database.ridgec,
-                'lr_elasticnet' :   model_database.lr_elasticnet,
-                'svc'           :   model_database.svc,
-                'gbc'           :   model_database.gbc,
-                'lightgbmc'     :   model_database.lightgbmc,
-                'xgboostc'      :   model_database.xgboostc,
-                'LogReg'        :   model_database.LogisticRegression,
-                'knn'           :   model_database.KNeighborsClassifier,
-                'SVC2'          :   model_database.SVC2,
-                'decissionTree' :   model_database.DecisionTreeClassifier,
-                'adaboost'      :   model_database.AdaBoostClassifier,
-                'GradientBoost' :   model_database.GradientBoostingClassifier,
-                'GaussianNB'    :   model_database.GaussianNB,
-                'RabdomForest'  :   model_database.RandomForestClassifier,
-                'ExtraTree'     :   model_database.ExtraTreesClassifier
-
-            }
+model_weight = []
+model_weight = []
+model_dicty = {
+                'ridgec'        :   model_database.ridgec,                      # RidgeClassifierCV
+                'lr_elasticnet' :   model_database.lr_elasticnet,               # LogisticRegression(penalty = 'elasticnet')
+                'svc'           :   model_database.svc,                         # SVC ( 'C': 0.7678, 'penalty': 'l1' )
+#                'gbc'           :   model_database.gbc,                         # GradientBoostingClassifier
+#                'lightgbmc'     :   model_database.lightgbmc,                   # LGBMClassifier
+                'xgboostc'      :   model_database.xgboostc,                    # XGBClassifier
+                'LogReg'        :   model_database.LogisticRegression,          # LogisticRegression
+#                'knn'           :   model_database.KNeighborsClassifier,        # KNeighborsClassifier
+#                'SVC2'          :   model_database.SVC2,                        # SVC ( 'C': 1.7, 'kernel': 'rbf' )
+#                'decissionTree' :   model_database.DecisionTreeClassifier,      # DecisionTreeClassifier
+                'adaboost'      :   model_database.AdaBoostClassifier,          # AdaBoostClassifier
+#                'GradientBoost' :   model_database.GradientBoostingClassifier,  # GradientBoostingClassifier
+#                'GaussianNB'    :   model_database.GaussianNB,                  # GaussianNB
+#                'RabdomForest'  :   model_database.RandomForestClassifier,      # RandomForestClassifier
+#                'ExtraTree'     :   model_database.ExtraTreesClassifier         # ExtraTreesClassifier
+                }
 
 ####################################################################################################
+####################################################################################################
+#                                   save high accuracy dataset
+####################################################################################################
+def save_80_acc(acc, name):
+    if acc > 87.66 and random_split:
+        import os
+        path = "output/set_of_+80_acc/{0:.2f}_for_{1}".format(acc, name)
+        save_path = "./output/set_of_+80_acc/{0:.2f}_for_{1}/".format(acc, name)
+        try:
+            os.mkdir(path)
+            print('Path created')
+        except:
+            print('Can not create path')
+            pass
+
+        project_analyser.save_random_split(save_path)
+
+        print('Data recorded in : {0}'.format(path))
+        print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 ####################################################################################################
 #                                   model start : 1
 ####################################################################################################
@@ -117,65 +127,72 @@ for name, model in model_dicty.items():
     m_fit_dicty[name] = model_fit
 
 
-def blend_models_predict(X, Y):
+def blend_models_predict(X, Y, test=0):
+    best_acc = best_acc_index = count = 0
     m_predict = []
+    if test:
+        y_ann, best_acc = get_test_result()
+        m_predict.append(y_ann)
+        best_acc_index = count = 1
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     for name, m_fit in m_fit_dicty.items():
         predict = m_fit.predict(X)
-        accuracy_calculator(name, predict, Y)
         m_predict.append(predict)
-
-    combine = 0
-    try:
-        for pred, w in zip(m_predict, model_weight):
-                combine = combine + (pred * w)
-    except:
-        for pred in m_predict:
-            combine = combine + pred
-    return combine
+        if test:
+            _, acc = accuracy_calculator(name, predict, Y)
+            if acc > best_acc:
+                best_acc = acc
+                best_acc_index = count
+            save_80_acc(acc, name)
+        count += 1
+    
+    #print('best_acc_index =',best_acc_index)
+    # Max voting among predictions
+    result = np.array([])
+    for i in range(0, len(m_predict[0])):
+        try:
+            result = np.append(result, mode([clm[i] for clm in m_predict]))
+        except:
+            result = np.append(result, m_predict[best_acc_index][i])
+    return result
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print('\n~~~~~~~~~~~~~~~~~~~~~~For, train data~~~~~~~~~~~~~~~~~~~~~~~~~~')
+print('\n~~~~~~~~~~~~~~~~~~~~~~For, Train data~~~~~~~~~~~~~~~~~~~~~~~~~~')
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 rmse = rmse(y_train, blend_models_predict(X_train, y_train))
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 print('\nrmse score on train data  :~>  ', rmse)
 
 #y_pred = np.floor(np.expm1(blend_models_predict(X_test)))
-print('\n\n~~~~~~~~~~~~~~~~~~~~~~For, Test data~~~~~~~~~~~~~~~~~~~~~~~~~~')
+print('\n\n~~~~~~~~~~~~~~~~~~~~~~For,  Test data~~~~~~~~~~~~~~~~~~~~~~~~~~')
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-y_pred = blend_models_predict(X_test, y_test)
-y_pred_data = pd.DataFrame({'Outcome':y_pred})
-#print(y_pred_data)
+y_pred = blend_models_predict(X_test, y_test, test=1)
+result_file['Outcome'] = y_pred
+#print(result_file)
 
 ######################################## Brutal approach ##########################################
 # Brutal approach to deal with predictions close to outer range 
-q1 = y_pred_data['Outcome'].quantile(0.0042)
-q2 = y_pred_data['Outcome'].quantile(0.99)
+q1 = result_file['Outcome'].quantile(0.0042)
+q2 = result_file['Outcome'].quantile(0.99)
 
-y_pred_data['Outcome'] = y_pred_data['Outcome'].apply(lambda x: x if x > q1 else x*0.77)
-y_pred_data['Outcome'] = y_pred_data['Outcome'].apply(lambda x: x if x < q2 else x*1.1)
+result_file['Outcome'] = result_file['Outcome'].apply(lambda x: x if x > q1 else x*0.77)
+result_file['Outcome'] = result_file['Outcome'].apply(lambda x: x if x < q2 else x*1.1)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #print('y_pred : ', y_pred[0:10])
 print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-y_pred_data['Outcome'], c_acc = accuracy_calculator('Combine', y_pred_data['Outcome'], y_test)
-print("\nAccuracy score: %.8f" % (y_test == y_pred_data['Outcome']).mean())
+result_file['Outcome'], c_acc = accuracy_calculator('Combine', result_file['Outcome'], y_test)
+#print("\nAccuracy score: %.8f" % (y_test == result_file['Outcome']).mean())
 print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 #print(pp)
 ####################################################################################################
 #                                   save result
 ####################################################################################################
-y_pred_data.to_csv(output_path+'y_pred_data.csv', index=False)
+save_80_acc(c_acc, 'Combine')
+####################################################################################################
+if c_acc > 87:
+    file_name = controler.resut_file_name + '_with acc:_{0:.2f}.csv'.format(c_acc)
+    print('Result saved in :~> ', output_path+file_name)
+    result_file.to_csv(output_path + file_name, index=False)
 
-if actual_split:
-        try:
-                submission['Outcome'] = y_pred
-                path = output+'_with accuracy:_{0}.csv'.format('%.02f' % acc)
-                submission.to_csv("./output/submission/"+path, index=False)
-                print('result is in output ~>> ', path)
-                print('\n\n')
-        except:
-                pass
-else:
-        submission['Id']

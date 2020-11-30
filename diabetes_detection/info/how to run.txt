@@ -7,8 +7,8 @@ For linux user ------
 2. Using the run.sh file you can run this project by typing './run.sh' in terminal at the file location.
     or,
         > At the 'run.sh' location type these commands to run the perticular section
-        > python3 -m programs.project_model_v11_2       >>> For full project with all algorithms
-        > python3 -m programs.project_model_v11         >>> For full project with best algorithms
+        > python3 -m programs.project_model_v11_all     >>> For full project with all algorithms
+        > python3 -m programs.project_model_v11_best    >>> For full project with best algorithms
         > python3 -m programs.ann_model_v4              >>> For ann model, change
                                                             activate_train = 1 in controler.py file to run with training
         > python3 -m programs.project_v3_actual_split   >>> For data preprocessing with the set in input folder    
@@ -17,16 +17,16 @@ For linux user ------
 
 ##########################################################################################################################
 
-For linux user ------
-1. Install all the requirements mentioned in the file 'requirements_pip3.sh'
-    >> You can run the entire file by typing './requirements_pip3.sh' in terminal at the file location.
-2. Using the run.sh file you can run this project by typing './run.sh' in terminal at the file location.
+For windows user ------
+1. Install all the requirements mentioned in the file 'requirements_pip.bat'
+    >> You can run the entire file by typing 'requirements_pip.bat' in CMD at the file location.
+2. Using the run.bat file you can run this project by typing 'run.bat' in CMD at the file location.
     or,
-        > At the 'run.sh' location type these commands to run the perticular section
-        > python3 -m programs.project_model_v11_2       >>> For full project with all algorithms
-        > python3 -m programs.project_model_v11         >>> For full project with best algorithms
-        > python3 -m programs.ann_model_v4              >>> For ann model, change
+        > At the 'run.bat' location type these commands to run the perticular section
+        > python -m programs.project_model_v11_all     >>> For full project with all algorithms
+        > python -m programs.project_model_v11_best    >>> For full project with best algorithms
+        > python -m programs.ann_model_v4              >>> For ann model, change
                                                             activate_train = 1 in controler.py file to run with training
-        > python3 -m programs.project_v3_actual_split   >>> For data preprocessing with the set in input folder    
-        > python3 -m programs.project_v5_random_split   >>> For data preprocessing
+        > python -m programs.project_v3_actual_split   >>> For data preprocessing with the set in input folder    
+        > python -m programs.project_v5_random_split   >>> For data preprocessing
         >>>>>>>> In controler.py file change the parameters' values to get effect on runtime
